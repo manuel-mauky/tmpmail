@@ -68,4 +68,51 @@ public class UserJpaIntegrationTest extends JpaTestHelper<User> {
 		persist(userWithSameEmail);
 	}
 
+	@Test
+	public void testHandlingOfTempEmailAddresses() {
+		// yoda registeres an account
+		User yoda = new User("yoda@example.org");
+		persist(yoda);
+		String userId = yoda.getId();
+
+		Domain exampleDotDe = new Domain("example.de");
+		persist(exampleDotDe);
+
+		// yoda creates this to temp email addresses ...
+		TempEmailAddress yodaAtExampleDotDe = new TempEmailAddress("yoda",
+				exampleDotDe);
+		persist(yodaAtExampleDotDe);
+		TempEmailAddress test123AtExampleDotDe = new TempEmailAddress(
+				"test123", exampleDotDe);
+		persist(test123AtExampleDotDe);
+
+		// ... and adds them to his account
+		yoda.addTempEmailAddresses(yodaAtExampleDotDe, test123AtExampleDotDe);
+
+		merge(yoda);
+
+		// successfully persisted everything was ;-)
+		User foundUser = find(userId);
+		assertThat(foundUser.getTempEmailAddresses()).hasSize(2).contains(
+				yodaAtExampleDotDe, test123AtExampleDotDe);
+
+
+		// lets remove this temp email address
+		yoda.removeTempEmailAddresses(yodaAtExampleDotDe);
+		merge(yoda);
+
+		// in the account now only one temp email address is saved
+		foundUser = find(userId);
+		assertThat(foundUser.getTempEmailAddresses()).hasSize(1)
+				.doesNotContain(yodaAtExampleDotDe)
+				.contains(test123AtExampleDotDe);
+
+		// the deleted temp email address is not used anymore ...
+		TempEmailAddress notFoundAddress = find(TempEmailAddress.class,
+				yodaAtExampleDotDe.getId());
+
+		// and so it is removed from the database
+		assertThat(notFoundAddress).isNull();
+
+	}
 }

@@ -61,6 +61,26 @@ public class JpaTestHelper<T extends AbstractEntity> {
 		return entity;
 	}
 
+
+	/**
+	 * This method can be used to find persisted instances of another type then
+	 * the generic type of this class.
+	 * 
+	 * @param clazz
+	 *            the type of the instance that should be found
+	 * @param id
+	 *            the id of the instance that should be found
+	 * @return the found entity or null if no entity with this id can be found.
+	 */
+	protected <T2> T2 find(final Class<? extends T2> clazz, final String id) {
+		final EntityManager entityManager = emf.createEntityManager();
+
+		final T2 entity = entityManager.find(clazz, id);
+		entityManager.close();
+		return entity;
+	}
+
+
 	/**
 	 * This method encapsulates the merge method of the entityManager.
 	 * 
