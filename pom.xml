@@ -47,6 +47,12 @@
 			<version>3.1.7</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail</artifactId>
+			<version>1.3</version>
+		</dependency>
+
 		<!-- JPA 2 -->
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
@@ -94,7 +100,7 @@
 			<version>1.1.2</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- BeanValidation -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -103,8 +109,8 @@
 		</dependency>
 
 	</dependencies>
-	
-	
+
+
 	<repositories>
 		<repository>
 			<id>EclipseLink Repo</id>

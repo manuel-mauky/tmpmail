@@ -33,7 +33,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 * @param entity
 	 *            the entity instance that has to be persisted.
 	 */
-	protected void persist(final AbstractEntity entity) {
+	public void persist(final AbstractEntity entity) {
 		final EntityManager entityManager = emf.createEntityManager();
 		entityManager.getTransaction().begin();
 
@@ -51,7 +51,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 *            The id of the entity
 	 * @return The found entity or null if there is no entity with this Id.
 	 */
-	protected T find(final String id) {
+	public T find(final String id) {
 		final EntityManager entityManager = emf.createEntityManager();
 
 		final T entity = entityManager.find(clazz, id);
@@ -72,7 +72,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 *            the id of the instance that should be found
 	 * @return the found entity or null if no entity with this id can be found.
 	 */
-	protected <T2> T2 find(final Class<? extends T2> clazz, final String id) {
+	public <T2> T2 find(final Class<? extends T2> clazz, final String id) {
 		final EntityManager entityManager = emf.createEntityManager();
 
 		final T2 entity = entityManager.find(clazz, id);
@@ -87,7 +87,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 * @param entity
 	 *            The entity that should be merged
 	 */
-	protected void merge(final T entity) {
+	public void merge(final T entity) {
 		final EntityManager entityManager = emf.createEntityManager();
 
 		entityManager.getTransaction().begin();
@@ -103,7 +103,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 * @param entity
 	 *            The entity that should be removed.
 	 */
-	protected void remove(final T entity) {
+	public void remove(final T entity) {
 		final EntityManager entityManager = emf.createEntityManager();
 
 		final AbstractEntity foundEntity = entityManager.find(clazz,
