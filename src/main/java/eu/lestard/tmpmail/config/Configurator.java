@@ -1,8 +1,7 @@
 package eu.lestard.tmpmail.config;
 
 /**
- * This is the central configuration component that stores all configuration
- * parameters.
+ * This is the central configuration component that stores all configuration parameters.
  * 
  * @author manuel.mauky
  * 
@@ -10,14 +9,25 @@ package eu.lestard.tmpmail.config;
 public interface Configurator {
 
 	/**
-	 * Return the Integer param for the given key or <code>null</code> if no
-	 * param is available for the given key.
+	 * Return the Integer param for the given key or <code>null</code> if no param is available for
+	 * the given key.
 	 */
 	Integer getValue(IntKey key);
 
 	/**
-	 * Persist the configuration parameter with the given key and value.
+	 * Return the String param for the given key or <code>null</code> if no param is available for
+	 * the given key.
+	 */
+	String getValue(StringKey key);
+
+	/**
+	 * Persist the Integer configuration parameter with the given key and value.
 	 */
 	void setValue(IntKey key, Integer value);
+
+	/**
+	 * Persist the String configuration parameter with the given key and value.
+	 */
+	void setValue(StringKey key, String value);
 
 }
