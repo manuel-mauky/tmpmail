@@ -1,4 +1,4 @@
-package eu.lestard.tmpmail.core;
+package eu.lestard.tmpmail.core.outgoing;
 
 import javax.mail.internet.MimeMessage;
 

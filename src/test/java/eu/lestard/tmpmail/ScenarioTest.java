@@ -4,17 +4,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.URLName;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.ParseException;
 
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
@@ -26,7 +17,7 @@ import org.subethamail.wiser.WiserMessage;
 
 import eu.lestard.tmpmail.config.Configurator;
 import eu.lestard.tmpmail.config.IntKey;
-import eu.lestard.tmpmail.core.MailInputListener;
+import eu.lestard.tmpmail.core.incoming.MailInputListener;
 import eu.lestard.tmpmail.persistence.Domain;
 import eu.lestard.tmpmail.persistence.JpaTestHelper;
 import eu.lestard.tmpmail.persistence.TempEmailAddress;
@@ -35,26 +26,28 @@ import eu.lestard.tmpmail.persistence.User;
 /**
  * This test should give an overview of the application process.
  * 
- * In this scenario the application is handling the domain "example.org" so that all emails with
- * this domain part are processed by the application.
+ * In this scenario the application is handling the domain "example.org" so that
+ * all emails with this domain part are processed by the application.
  * 
- * The user "luke" with the email address "luke@example.de" (note the tld "de") creates an account
- * for the application and creates 2 temp email addresses ("test123@example.org" and
- * "test456@example.org").
+ * The user "luke" with the email address "luke@example.de" (note the tld "de")
+ * creates an account for the application and creates 2 temp email addresses
+ * ("test123@example.org" and "test456@example.org").
  * 
- * Now a person with the email address "darth.vader@darkside.example.de" is sending an email to one
- * of lukes temp email addresses.
+ * Now a person with the email address "darth.vader@darkside.example.de" is
+ * sending an email to one of lukes temp email addresses.
  * 
  * This email is forwarded to lukes real email address "luke@example.de".
  * 
  * 
  * Technical informations:
  * 
- * The application uses the PORT 25000 and listens to emails with the domain part "example.org".
+ * The application uses the PORT 25000 and listens to emails with the domain
+ * part "example.org".
  * 
- * To forward emails the application needs an external SMTP-Server. This external SMTP-Server is
- * mocked out in this test with the {@link Wiser} class from the testing framework "Subethasmtp". It
- * is configured to use the SMTP-Host "localhost" and the port 20000.
+ * To forward emails the application needs an external SMTP-Server. This
+ * external SMTP-Server is mocked out in this test with the {@link Wiser} class
+ * from the testing framework "Subethasmtp". It is configured to use the
+ * SMTP-Host "localhost" and the port 20000.
  * 
  * @author manuel.mauky
  * 
@@ -99,7 +92,8 @@ public class ScenarioTest {
 		weld = new Weld().initialize();
 
 		configurator = weld.instance().select(Configurator.class).get();
-		mailInputListener = weld.instance().select(MailInputListener.class).get();
+		mailInputListener = weld.instance().select(MailInputListener.class)
+				.get();
 
 	}
 
@@ -148,9 +142,11 @@ public class ScenarioTest {
 	}
 
 	private void createSomeTempMailMappings() {
-		final TempEmailAddress test123 = new TempEmailAddress("test123", exampleDotOrg);
+		final TempEmailAddress test123 = new TempEmailAddress("test123",
+				exampleDotOrg);
 		tempEmailAddressPersistence.persist(test123);
-		final TempEmailAddress test456 = new TempEmailAddress("test456", exampleDotOrg);
+		final TempEmailAddress test456 = new TempEmailAddress("test456",
+				exampleDotOrg);
 		tempEmailAddressPersistence.persist(test456);
 
 		user.addTempEmailAddresses(test123, test456);
@@ -164,7 +160,9 @@ public class ScenarioTest {
 		final String subject = "family affairs";
 		final String messageString = "I'm your Father";
 
-		sendWithJavaMail(to, from, subject, messageString);
+		JavaMailTestHelper helper = new JavaMailTestHelper(INCOMMING_SMTP_PORT);
+
+		helper.sendWithJavaMail(from, to, subject, messageString);
 
 	}
 
@@ -176,46 +174,20 @@ public class ScenarioTest {
 
 		final WiserMessage firstMessage = messages.get(0);
 
-		assertThat(firstMessage.getEnvelopeSender()).isEqualTo("darth.vader@darkside.example.com");
-		assertThat(firstMessage.getEnvelopeReceiver()).isEqualTo("luke@example.de");
+		assertThat(firstMessage.getEnvelopeSender()).isEqualTo(
+				"darth.vader@darkside.example.com");
+		assertThat(firstMessage.getEnvelopeReceiver()).isEqualTo(
+				"luke@example.de");
 		try {
-			assertThat(firstMessage.getMimeMessage().getSubject()).isEqualTo("family affairs");
-			assertThat(firstMessage.getMimeMessage().getContent()).isEqualTo("I'm your Father");
+			assertThat(firstMessage.getMimeMessage().getSubject()).isEqualTo(
+					"family affairs");
+			assertThat(firstMessage.getMimeMessage().getContent()).isEqualTo(
+					"I'm your Father");
 		} catch (final MessagingException e) {
 			e.printStackTrace();
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 
-	}
-
-	private void sendWithJavaMail(final String to, final String from, final String subject, final String messageString) {
-		final Properties props = new Properties();
-		props.put("mail.smtp.host", "locahost");
-
-		final Session session = Session.getDefaultInstance(props);
-		try {
-			final Transport transport = session.getTransport(new URLName("smtp", "localhost", INCOMMING_SMTP_PORT,
-					null, "", ""));
-
-			final MimeMessage message = new MimeMessage(session);
-
-			message.setFrom(new InternetAddress(from));
-			message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-
-			message.setSubject(subject);
-			message.setContent(messageString, "text/plain");
-
-			transport.connect();
-			transport.sendMessage(message, message.getAllRecipients());
-			transport.close();
-
-		} catch (final NoSuchProviderException e) {
-			e.printStackTrace();
-		} catch (final ParseException e) {
-			e.printStackTrace();
-		} catch (final MessagingException e) {
-			e.printStackTrace();
-		}
 	}
 }
