@@ -16,6 +16,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.ParseException;
 
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +77,8 @@ public class ScenarioTest {
 
 	private Wiser wiser;
 
+	private WeldContainer weld;
+
 	@Before
 	public void setup() {
 		userPersistence = new JpaTestHelper<User>();
@@ -90,6 +94,13 @@ public class ScenarioTest {
 		wiser.setPort(OUTGOING_SMTP_PORT);
 		wiser.setHostname(OUTGOING_SMTP_HOST);
 		wiser.start();
+
+
+		weld = new Weld().initialize();
+
+		configurator = weld.instance().select(Configurator.class).get();
+		mailInputListener = weld.instance().select(MailInputListener.class).get();
+
 	}
 
 	@After
