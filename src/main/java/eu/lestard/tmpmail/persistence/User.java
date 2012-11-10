@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -20,7 +22,12 @@ import org.hibernate.validator.constraints.Email;
  */
 @Entity
 @Table(name = "USERS")
+@NamedQueries({ @NamedQuery(name = User.FIND_BY_TEMP_EMAIL_ADDRESS_ID,
+		query = "SELECT u FROM User u join u.tempEmailAddresses e WHERE e.id = :id") })
 public class User extends AbstractEntity {
+
+	public static final String FIND_BY_TEMP_EMAIL_ADDRESS_ID = "User.find_by_temp_email_address_id";
+
 
 	@Email
 	@Column(unique = true)
@@ -32,9 +39,10 @@ public class User extends AbstractEntity {
 
 
 	@OneToMany(orphanRemoval = true)
-	private List<TempEmailAddress> tempEmailAddresses;
+	private final List<TempEmailAddress> tempEmailAddresses;
 
 	public User(final String emailAddress) {
+		this();
 		this.emailAddress = emailAddress;
 		passwordHash = "";
 		passwordSalt = "";
@@ -71,13 +79,11 @@ public class User extends AbstractEntity {
 		return Collections.unmodifiableList(tempEmailAddresses);
 	}
 
-	public void addTempEmailAddresses(
-			final TempEmailAddress... tempEmailAddress) {
+	public void addTempEmailAddresses(final TempEmailAddress... tempEmailAddress) {
 		tempEmailAddresses.addAll(Arrays.asList(tempEmailAddress));
 	}
 
-	public void removeTempEmailAddresses(
-			final TempEmailAddress... tempEmailAddresses) {
+	public void removeTempEmailAddresses(final TempEmailAddress... tempEmailAddresses) {
 		this.tempEmailAddresses.removeAll(Arrays.asList(tempEmailAddresses));
 	}
 

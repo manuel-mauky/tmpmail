@@ -2,7 +2,11 @@ package eu.lestard.tmpmail.persistence;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
 import javax.persistence.RollbackException;
+import javax.persistence.TypedQuery;
 
 import org.junit.After;
 import org.junit.Before;
@@ -118,4 +122,35 @@ public class UserJpaIntegrationTest {
 		assertThat(notFoundAddress).isNull();
 
 	}
+
+
+	@Test
+	public void testNamedQueryFindByTempEmailAddress() {
+		User yoda = new User("yoda@example.org");
+		jpaTestHelper.persist(yoda);
+
+		Domain exampleDotDe = new Domain("example.de");
+		jpaTestHelper.persist(exampleDotDe);
+
+		TempEmailAddress yodaAtExampleDotDe = new TempEmailAddress("yoda", exampleDotDe);
+		jpaTestHelper.persist(yodaAtExampleDotDe);
+
+		yoda.addTempEmailAddresses(yodaAtExampleDotDe);
+		jpaTestHelper.merge(yoda);
+
+
+
+
+		EntityManager entityManager = jpaTestHelper.getEntityManager();
+
+		TypedQuery<User> query = entityManager.createNamedQuery(User.FIND_BY_TEMP_EMAIL_ADDRESS_ID, User.class);
+
+		query.setParameter("id", yodaAtExampleDotDe.getId());
+
+		List<User> resultList = query.getResultList();
+
+		assertThat(resultList).hasSize(1).contains(yoda);
+
+	}
+
 }

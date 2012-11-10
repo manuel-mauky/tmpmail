@@ -20,21 +20,19 @@ public class JavaMailTestHelper {
 		this.port = port;
 	}
 
-	public void sendWithJavaMail(final String from, final String to,
-			final String subject, final String messageString) {
+	public void sendWithJavaMail(final String from, final String to, final String subject,
+			final String messageString) {
 		final Properties props = new Properties();
 		props.put("mail.smtp.host", "locahost");
 
 		final Session session = Session.getDefaultInstance(props);
 		try {
-			final Transport transport = session.getTransport(new URLName(
-					"smtp", "localhost", port, null, "", ""));
+			final Transport transport = session.getTransport(new URLName("smtp", "localhost", port, null, "", ""));
 
 			final MimeMessage message = new MimeMessage(session);
 
 			message.setFrom(new InternetAddress(from));
-			message.setRecipient(Message.RecipientType.TO, new InternetAddress(
-					to));
+			message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
 
 			message.setSubject(subject);
 			message.setContent(messageString, "text/plain");
@@ -43,11 +41,7 @@ public class JavaMailTestHelper {
 			transport.sendMessage(message, message.getAllRecipients());
 			transport.close();
 
-		} catch (final NoSuchProviderException e) {
-			e.printStackTrace();
-		} catch (final ParseException e) {
-			e.printStackTrace();
-		} catch (final MessagingException e) {
+		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
 	}
