@@ -19,15 +19,13 @@ import eu.lestard.tmpmail.persistence.TempEmailAddress;
 
 public class MailFilterServiceImpl implements MailFilterService {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(MailFilterServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MailFilterServiceImpl.class);
 
 	private final ForwardingService forwardingService;
 
 	private final EntityManagerFactory emf;
 
-	public MailFilterServiceImpl(final ForwardingService forwardingService,
-			final EntityManagerFactory emf) {
+	public MailFilterServiceImpl(final ForwardingService forwardingService, final EntityManagerFactory emf) {
 		this.forwardingService = forwardingService;
 		this.emf = emf;
 	}
@@ -35,8 +33,7 @@ public class MailFilterServiceImpl implements MailFilterService {
 	@Override
 	public void filterEmail(final MimeMessage emailMessage) {
 		if (emailMessage == null) {
-			throw new IllegalArgumentException(
-					"The Param MimeMessage must not be null.");
+			throw new IllegalArgumentException("The Param MimeMessage must not be null.");
 		}
 
 		String recipientAddress = getRecipientAddress(emailMessage);
@@ -48,6 +45,41 @@ public class MailFilterServiceImpl implements MailFilterService {
 		if (domain == null) {
 			return;
 		}
+
+		String localPart = getLocalPart(recipientAddress);
+
+		TempEmailAddress tempEmailAddress = loadTempEmailAddressFromDatabase(localPart, domain);
+
+		if (tempEmailAddress != null) {
+			forwardingService.forwardMessage(emailMessage, tempEmailAddress);
+		}
+	}
+
+	/**
+	 * Load the {@link TempEmailAddress} instance with the given local part and
+	 * domain from the database. When there is no temp email address persisted
+	 * with the given values than <code>null</code> is returned.
+	 * 
+	 * @param localPart
+	 * @param domain
+	 * @return
+	 */
+	protected TempEmailAddress loadTempEmailAddressFromDatabase(final String localPart, final Domain domain) {
+
+		EntityManager entityManager = emf.createEntityManager();
+
+		TypedQuery<TempEmailAddress> query = entityManager.createNamedQuery(
+				TempEmailAddress.FIND_BY_LOCAL_AND_DOMAIN_PART, TempEmailAddress.class);
+		query.setParameter("localpart", localPart);
+		query.setParameter("domainpart", domain.getDomainAsString());
+
+		List<TempEmailAddress> resultList = query.getResultList();
+
+		if (resultList.isEmpty()) {
+			return null;
+		}
+
+		return resultList.get(0);
 	}
 
 	/**
@@ -63,8 +95,7 @@ public class MailFilterServiceImpl implements MailFilterService {
 	protected Domain loadDomainFromDatabase(final String domainPart) {
 		EntityManager entityManager = emf.createEntityManager();
 
-		TypedQuery<Domain> query = entityManager.createNamedQuery(
-				Domain.FIND_BY_DOMAIN_NAME, Domain.class);
+		TypedQuery<Domain> query = entityManager.createNamedQuery(Domain.FIND_BY_DOMAIN_NAME, Domain.class);
 
 		query.setParameter("domainName", domainPart);
 
@@ -86,10 +117,10 @@ public class MailFilterServiceImpl implements MailFilterService {
 	}
 
 	/**
-	 * Returns the user part of the given email address. This method is awaiting
-	 * an valid email address as string.
+	 * Returns the local part of the given email address. This method is
+	 * awaiting an valid email address as string.
 	 */
-	protected String getUserPart(final String recipientAddress) {
+	protected String getLocalPart(final String recipientAddress) {
 		return recipientAddress.split("@")[0];
 	}
 

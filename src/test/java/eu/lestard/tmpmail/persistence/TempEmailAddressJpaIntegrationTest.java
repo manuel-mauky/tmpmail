@@ -2,7 +2,11 @@ package eu.lestard.tmpmail.persistence;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
 import javax.persistence.RollbackException;
+import javax.persistence.TypedQuery;
 
 import org.junit.After;
 import org.junit.Before;
@@ -108,6 +112,35 @@ public class TempEmailAddressJpaIntegrationTest {
 		tempEmailAddressPersistence.persist(addressWithSameDomain);
 
 		// no exception is thrown
+	}
+
+	@Test
+	public void testNamedQueryFindByLocalAndDomainPart() {
+		Domain exampleDotOrg = new Domain("example.org");
+		domainPersistence.persist(exampleDotOrg);
+
+		TempEmailAddress address1 = new TempEmailAddress("test123",
+				exampleDotOrg);
+		tempEmailAddressPersistence.persist(address1);
+
+		TempEmailAddress address2 = new TempEmailAddress("test456",
+				exampleDotOrg);
+		tempEmailAddressPersistence.persist(address2);
+
+
+		EntityManager entityManager = tempEmailAddressPersistence
+				.getEntityManager();
+
+		TypedQuery<TempEmailAddress> query = entityManager.createNamedQuery(
+				TempEmailAddress.FIND_BY_LOCAL_AND_DOMAIN_PART,
+				TempEmailAddress.class);
+
+		query.setParameter("localpart", "test123");
+		query.setParameter("domainpart", "example.org");
+
+		List<TempEmailAddress> resultList = query.getResultList();
+
+		assertThat(resultList).hasSize(1).contains(address1);
 	}
 
 }

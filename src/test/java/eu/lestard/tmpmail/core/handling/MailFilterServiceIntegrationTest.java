@@ -43,12 +43,10 @@ public class MailFilterServiceIntegrationTest {
 
 	@Before
 	public void setup() {
-		tempEmailAddressPersistence = new JpaTestHelper<>(
-				TempEmailAddress.class);
+		tempEmailAddressPersistence = new JpaTestHelper<>(TempEmailAddress.class);
 		domainPersistence = new JpaTestHelper<>(Domain.class);
 
-		EntityManagerFactory emf = Persistence
-				.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
 
 		forwardingServiceMock = mock(ForwardingService.class);
 
@@ -63,20 +61,17 @@ public class MailFilterServiceIntegrationTest {
 	}
 
 	@Test
-	public void testMessageWithKnownAddressIsForwarded()
-			throws MessagingException {
+	public void testMessageWithKnownAddressIsForwarded() throws MessagingException {
 		Domain exampleDotOrg = new Domain("example.org");
 		domainPersistence.persist(exampleDotOrg);
 
-		TempEmailAddress test123 = new TempEmailAddress("test123",
-				exampleDotOrg);
+		TempEmailAddress test123 = new TempEmailAddress("test123", exampleDotOrg);
 		tempEmailAddressPersistence.persist(test123);
 
 
 		MimeMessage message = createMessage();
 
-		message.setRecipient(RecipientType.TO, new InternetAddress(
-				"test123@example.org"));
+		message.setRecipient(RecipientType.TO, new InternetAddress("test123@example.org"));
 
 
 		filterService.filterEmail(message);
@@ -88,34 +83,29 @@ public class MailFilterServiceIntegrationTest {
 	public void testDomainIsNotKnown() throws MessagingException {
 		final MimeMessage message = createMessage();
 
-		message.setRecipient(RecipientType.TO, new InternetAddress(
-				"test123@example.org"));
+		message.setRecipient(RecipientType.TO, new InternetAddress("test123@example.org"));
 
 		filterService.filterEmail(message);
 
 		// no message is forwarded
-		verify(forwardingServiceMock, never()).forwardMessage(
-				any(MimeMessage.class), any(TempEmailAddress.class));
+		verify(forwardingServiceMock, never()).forwardMessage(any(MimeMessage.class), any(TempEmailAddress.class));
 	}
 
 
 
 	@Test
-	public void testDomainIsKnownButNoTempMailMappingSaved()
-			throws MessagingException {
+	public void testDomainIsKnownButNoTempMailMappingSaved() throws MessagingException {
 		Domain exampleDotOrg = new Domain("example.org");
 		domainPersistence.persist(exampleDotOrg);
 
 		MimeMessage message = createMessage();
-		message.setRecipient(RecipientType.TO, new InternetAddress(
-				"test123@example.org"));
+		message.setRecipient(RecipientType.TO, new InternetAddress("test123@example.org"));
 
 		filterService.filterEmail(message);
 
 
 		// no message is forwarded
-		verify(forwardingServiceMock, never()).forwardMessage(
-				any(MimeMessage.class), any(TempEmailAddress.class));
+		verify(forwardingServiceMock, never()).forwardMessage(any(MimeMessage.class), any(TempEmailAddress.class));
 	}
 
 
@@ -124,8 +114,7 @@ public class MailFilterServiceIntegrationTest {
 		Domain exampleDotOrg = new Domain("example.org");
 		domainPersistence.persist(exampleDotOrg);
 
-		Domain loadedDomain = filterService
-				.loadDomainFromDatabase("example.org");
+		Domain loadedDomain = filterService.loadDomainFromDatabase("example.org");
 
 		assertThat(loadedDomain).isEqualTo(exampleDotOrg);
 	}
@@ -135,8 +124,7 @@ public class MailFilterServiceIntegrationTest {
 		Domain exampleDotOrg = new Domain("example.org");
 		domainPersistence.persist(exampleDotOrg);
 
-		Domain loadedDomain = filterService
-				.loadDomainFromDatabase("example.com"); // .com
+		Domain loadedDomain = filterService.loadDomainFromDatabase("example.com"); // .com
 
 		assertThat(loadedDomain).isNull();
 	}
@@ -147,19 +135,23 @@ public class MailFilterServiceIntegrationTest {
 		Domain exampleDotOrg = new Domain("example.org");
 		domainPersistence.persist(exampleDotOrg);
 
-		TempEmailAddress address1 = new TempEmailAddress("test123",
-				exampleDotOrg);
+		TempEmailAddress address1 = new TempEmailAddress("test123", exampleDotOrg);
 		tempEmailAddressPersistence.persist(address1);
-		TempEmailAddress address2 = new TempEmailAddress("test456",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(address2);
 
-
-		TempEmailAddress loadedAddress = filterService
-				.loadTempEmailAddressFromDatabase("test123", exampleDotOrg);
+		TempEmailAddress loadedAddress = filterService.loadTempEmailAddressFromDatabase("test123", exampleDotOrg);
 
 		assertThat(loadedAddress).isEqualTo(address1);
 
+	}
+
+	@Test
+	public void testLoadTempEmailAddressFromDatabaseFailNoAddressPersisted() {
+		Domain exampleDotOrg = new Domain("example.org");
+		domainPersistence.persist(exampleDotOrg);
+
+		TempEmailAddress loadedAddress = filterService.loadTempEmailAddressFromDatabase("test", exampleDotOrg);
+
+		assertThat(loadedAddress).isNull();
 	}
 
 	/**

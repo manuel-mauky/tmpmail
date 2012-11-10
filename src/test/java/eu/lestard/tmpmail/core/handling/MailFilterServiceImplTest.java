@@ -46,8 +46,7 @@ public class MailFilterServiceImplTest {
 
 		forwardingServiceMock = mock(ForwardingService.class);
 
-		filterService = new MailFilterServiceImpl(forwardingServiceMock,
-				emfMock);
+		filterService = new MailFilterServiceImpl(forwardingServiceMock, emfMock);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -62,16 +61,14 @@ public class MailFilterServiceImplTest {
 		filterService.getRecipientAddress(message);
 
 		// no message is forwarded
-		verify(forwardingServiceMock, never()).forwardMessage(
-				any(MimeMessage.class), any(TempEmailAddress.class));
+		verify(forwardingServiceMock, never()).forwardMessage(any(MimeMessage.class), any(TempEmailAddress.class));
 	}
 
 	@Test
 	public void testGetRecipientAddress() throws MessagingException {
 		MimeMessage message = createMessage();
 
-		message.addRecipient(RecipientType.TO, new InternetAddress(
-				"test@example.org"));
+		message.addRecipient(RecipientType.TO, new InternetAddress("test@example.org"));
 
 		String result = filterService.getRecipientAddress(message);
 
@@ -96,12 +93,10 @@ public class MailFilterServiceImplTest {
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetRecipientAddressExceptionHandling()
-			throws MessagingException {
+	public void testGetRecipientAddressExceptionHandling() throws MessagingException {
 
 		MimeMessage message = mock(MimeMessage.class);
-		when(message.getRecipients(RecipientType.TO)).thenThrow(
-				MessagingException.class);
+		when(message.getRecipients(RecipientType.TO)).thenThrow(MessagingException.class);
 
 		String result = filterService.getRecipientAddress(message);
 		assertThat(result).isNull();
@@ -113,14 +108,11 @@ public class MailFilterServiceImplTest {
 	 * @throws MessagingException
 	 */
 	@Test
-	public void testGetRecipientAddressFirstIsReturned()
-			throws MessagingException {
+	public void testGetRecipientAddressFirstIsReturned() throws MessagingException {
 		MimeMessage message = createMessage();
 
-		message.addRecipient(RecipientType.TO, new InternetAddress(
-				"test@example.org"));
-		message.addRecipient(RecipientType.TO, new InternetAddress(
-				"test123@example.org"));
+		message.addRecipient(RecipientType.TO, new InternetAddress("test@example.org"));
+		message.addRecipient(RecipientType.TO, new InternetAddress("test123@example.org"));
 
 		String result = filterService.getRecipientAddress(message);
 
@@ -139,11 +131,11 @@ public class MailFilterServiceImplTest {
 	}
 
 	@Test
-	public void testGetUserPart() {
-		String result = filterService.getUserPart("test@example.org");
+	public void testGetLocalPart() {
+		String result = filterService.getLocalPart("test@example.org");
 		assertThat(result).isEqualTo("test");
 
-		result = filterService.getUserPart("test123.test.456@example.org");
+		result = filterService.getLocalPart("test123.test.456@example.org");
 		assertThat(result).isEqualTo("test123.test.456");
 	}
 
