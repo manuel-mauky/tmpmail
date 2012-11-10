@@ -1,4 +1,8 @@
-package eu.lestard.tmpmail.config;
+package eu.lestard.tmpmail.config.internal;
+
+import eu.lestard.tmpmail.config.IntKey;
+import eu.lestard.tmpmail.config.StringKey;
+
 
 /**
  * This is the central configuration component that stores all configuration parameters.

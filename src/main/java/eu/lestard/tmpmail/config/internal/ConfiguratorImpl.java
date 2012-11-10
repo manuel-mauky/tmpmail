@@ -1,6 +1,13 @@
-package eu.lestard.tmpmail.config;
+package eu.lestard.tmpmail.config.internal;
 
 import java.util.EnumMap;
+
+import javax.enterprise.context.ApplicationScoped;
+
+import eu.lestard.tmpmail.config.IntKey;
+import eu.lestard.tmpmail.config.StringKey;
+
+
 
 /**
  * This class encapsulates the mappings for the configuration parameters.
@@ -8,6 +15,7 @@ import java.util.EnumMap;
  * @author manuel.mauky
  * 
  */
+@ApplicationScoped
 public class ConfiguratorImpl implements Configurator {
 
 	private final EnumMap<IntKey, Integer> integerValues = new EnumMap<IntKey, Integer>(IntKey.class);

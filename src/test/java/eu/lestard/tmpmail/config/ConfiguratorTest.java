@@ -5,6 +5,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.lestard.tmpmail.config.internal.Configurator;
+import eu.lestard.tmpmail.config.internal.ConfiguratorImpl;
+
+
 public class ConfiguratorTest {
 
 	private Configurator configurator;
