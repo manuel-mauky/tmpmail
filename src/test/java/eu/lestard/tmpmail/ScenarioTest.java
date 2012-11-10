@@ -57,10 +57,7 @@ public class ScenarioTest {
 	private static final int INCOMMING_SMTP_PORT = 25000;
 	private static final int OUTGOING_SMTP_PORT = 20000;
 	private static final String OUTGOING_SMTP_HOST = "localhost";
-	private JpaTestHelper<User> userPersistence;
-	private JpaTestHelper<Domain> domainPersistence;
-	private JpaTestHelper<TempEmailAddress> tempEmailAddressPersistence;
-
+	private JpaTestHelper jpaTestHelper;
 
 	private Domain exampleDotOrg;
 
@@ -74,12 +71,7 @@ public class ScenarioTest {
 
 	@Before
 	public void setup() {
-		userPersistence = new JpaTestHelper<>(User.class);
-
-		domainPersistence = new JpaTestHelper<>(Domain.class);
-
-		tempEmailAddressPersistence = new JpaTestHelper<>(
-				TempEmailAddress.class);
+		jpaTestHelper = new JpaTestHelper();
 
 		wiser = new Wiser();
 		wiser.setPort(OUTGOING_SMTP_PORT);
@@ -90,18 +82,15 @@ public class ScenarioTest {
 		weld = new Weld().initialize();
 
 		configurator = weld.instance().select(Configurator.class).get();
-		mailInputListener = weld.instance().select(MailInputListener.class)
-				.get();
+		mailInputListener = weld.instance().select(MailInputListener.class).get();
 
 	}
 
 	@After
 	public void tearDown() {
-		userPersistence.tearDown();
-		domainPersistence.tearDown();
-		tempEmailAddressPersistence.tearDown();
+		jpaTestHelper.tearDown();
 
-
+		wiser.stop();
 	}
 
 	@Test
@@ -123,7 +112,7 @@ public class ScenarioTest {
 
 	private void defineDomainsThatAreHandled() {
 		exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 	}
 
 	private void configureSmtpServer() {
@@ -136,20 +125,18 @@ public class ScenarioTest {
 
 	private void createAnUserAccount() {
 		user = new User("luke@example.de");
-		userPersistence.persist(user);
+		jpaTestHelper.persist(user);
 	}
 
 	private void createSomeTempMailMappings() {
-		final TempEmailAddress test123 = new TempEmailAddress("test123",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(test123);
-		final TempEmailAddress test456 = new TempEmailAddress("test456",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(test456);
+		final TempEmailAddress test123 = new TempEmailAddress("test123", exampleDotOrg);
+		jpaTestHelper.persist(test123);
+		final TempEmailAddress test456 = new TempEmailAddress("test456", exampleDotOrg);
+		jpaTestHelper.persist(test456);
 
 		user.addTempEmailAddresses(test123, test456);
 
-		userPersistence.merge(user);
+		jpaTestHelper.merge(user);
 	}
 
 	private void sendAnEmailToAMappedEmailAddress() {
@@ -172,18 +159,12 @@ public class ScenarioTest {
 
 		final WiserMessage firstMessage = messages.get(0);
 
-		assertThat(firstMessage.getEnvelopeSender()).isEqualTo(
-				"darth.vader@darkside.example.com");
-		assertThat(firstMessage.getEnvelopeReceiver()).isEqualTo(
-				"luke@example.de");
+		assertThat(firstMessage.getEnvelopeSender()).isEqualTo("darth.vader@darkside.example.com");
+		assertThat(firstMessage.getEnvelopeReceiver()).isEqualTo("luke@example.de");
 		try {
-			assertThat(firstMessage.getMimeMessage().getSubject()).isEqualTo(
-					"family affairs");
-			assertThat(firstMessage.getMimeMessage().getContent()).isEqualTo(
-					"I'm your Father");
-		} catch (final MessagingException e) {
-			e.printStackTrace();
-		} catch (final IOException e) {
+			assertThat(firstMessage.getMimeMessage().getSubject()).isEqualTo("family affairs");
+			assertThat(firstMessage.getMimeMessage().getContent()).isEqualTo("I'm your Father");
+		} catch (final MessagingException | IOException e) {
 			e.printStackTrace();
 		}
 

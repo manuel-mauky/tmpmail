@@ -21,16 +21,16 @@ import org.junit.Test;
  */
 public class DomainJpaIntegrationTest {
 
-	private JpaTestHelper<Domain> domainPersistence;
+	private JpaTestHelper jpaTestHelper;
 
 	@Before
 	public void setup() {
-		domainPersistence = new JpaTestHelper<>(Domain.class);
+		jpaTestHelper = new JpaTestHelper();
 	}
 
 	@After
 	public void tearDown() {
-		domainPersistence.tearDown();
+		jpaTestHelper.tearDown();
 	}
 
 	@Test
@@ -40,19 +40,19 @@ public class DomainJpaIntegrationTest {
 		String id = domain.getId();
 
 		// CREATE
-		domainPersistence.persist(domain);
+		jpaTestHelper.persist(domain);
 
 		// READ
-		Domain foundDomain = domainPersistence.find(id);
+		Domain foundDomain = jpaTestHelper.find(id, Domain.class);
 
 		assertThat(foundDomain).isEqualsToByComparingFields(domain);
 
 		// There is no Update because the entity class is immutable
 
 		// DELETE
-		domainPersistence.remove(foundDomain);
+		jpaTestHelper.remove(foundDomain, Domain.class);
 
-		Domain notFoundDomain = domainPersistence.find(id);
+		Domain notFoundDomain = jpaTestHelper.find(id, Domain.class);
 		assertThat(notFoundDomain).isNull();
 	}
 
@@ -60,23 +60,22 @@ public class DomainJpaIntegrationTest {
 	@Test(expected = RollbackException.class)
 	public void testDomainAsStringIsUnique() {
 		Domain domain = new Domain("example.com");
-		domainPersistence.persist(domain);
+		jpaTestHelper.persist(domain);
 
 		Domain domainWithSameValue = new Domain("example.com");
 
-		domainPersistence.persist(domainWithSameValue);
+		jpaTestHelper.persist(domainWithSameValue);
 	}
 
 	@Test
 	public void testNamedQueryFindByDomainName() {
 		Domain domain = new Domain("example.com");
-		domainPersistence.persist(domain);
+		jpaTestHelper.persist(domain);
 
 
-		EntityManager entityManager = domainPersistence.getEntityManager();
+		EntityManager entityManager = jpaTestHelper.getEntityManager();
 
-		TypedQuery<Domain> query = entityManager.createNamedQuery(
-				Domain.FIND_BY_DOMAIN_NAME, Domain.class);
+		TypedQuery<Domain> query = entityManager.createNamedQuery(Domain.FIND_BY_DOMAIN_NAME, Domain.class);
 
 		query.setParameter("domainName", "example.com");
 

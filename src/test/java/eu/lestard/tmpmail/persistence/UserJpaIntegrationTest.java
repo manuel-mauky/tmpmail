@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * This integration test verifies that the {@link User} entity can be used as
  * JPA entity without problems.
@@ -18,23 +17,16 @@ import org.junit.Test;
  */
 public class UserJpaIntegrationTest {
 
-	private JpaTestHelper<User> userPersistence;
-	private JpaTestHelper<Domain> domainPersistence;
-	private JpaTestHelper<TempEmailAddress> tempEmailAddressPersistence;
+	private JpaTestHelper jpaTestHelper;
 
 	@Before
 	public void setup() {
-		userPersistence = new JpaTestHelper<>(User.class);
-		domainPersistence = new JpaTestHelper<>(Domain.class);
-		tempEmailAddressPersistence = new JpaTestHelper<>(
-				TempEmailAddress.class);
+		jpaTestHelper = new JpaTestHelper();
 	}
 
 	@After
 	public void tearDown() {
-		userPersistence.tearDown();
-		domainPersistence.tearDown();
-		tempEmailAddressPersistence.tearDown();
+		jpaTestHelper.tearDown();
 	}
 
 	@Test
@@ -44,10 +36,10 @@ public class UserJpaIntegrationTest {
 		String id = user.getId();
 
 		// CREATE
-		userPersistence.persist(user);
+		jpaTestHelper.persist(user);
 
 		// READ
-		User foundUser = userPersistence.find(id);
+		User foundUser = jpaTestHelper.find(id, User.class);
 
 		assertThat(foundUser).isEqualsToByComparingFields(user);
 
@@ -56,17 +48,17 @@ public class UserJpaIntegrationTest {
 		foundUser.setPasswordHash("secredPasswordHash");
 		foundUser.setPasswordSalt("secredPasswordSalt");
 
-		userPersistence.merge(foundUser);
+		jpaTestHelper.merge(foundUser);
 
-		User updatedUser = userPersistence.find(id);
+		User updatedUser = jpaTestHelper.find(id, User.class);
 
 		assertThat(updatedUser).isEqualsToByComparingFields(foundUser);
 
 
 		// DELETE
-		userPersistence.remove(updatedUser);
+		jpaTestHelper.remove(updatedUser, User.class);
 
-		User notFoundUser = userPersistence.find(id);
+		User notFoundUser = jpaTestHelper.find(id, User.class);
 		assertThat(notFoundUser).isNull();
 	}
 
@@ -74,57 +66,53 @@ public class UserJpaIntegrationTest {
 	@Test(expected = RollbackException.class)
 	public void testEmailIsUnique() {
 		User user = new User("yoda@example.org");
-		userPersistence.persist(user);
+		jpaTestHelper.persist(user);
 
 		User userWithSameEmail = new User("yoda@example.org");
 
 		// user has the same email address so an exception has to
 		// be thrown.
-		userPersistence.persist(userWithSameEmail);
+		jpaTestHelper.persist(userWithSameEmail);
 	}
 
 	@Test
 	public void testHandlingOfTempEmailAddresses() {
 		// yoda registeres an account
 		User yoda = new User("yoda@example.org");
-		userPersistence.persist(yoda);
+		jpaTestHelper.persist(yoda);
 		String userId = yoda.getId();
 
 		Domain exampleDotDe = new Domain("example.de");
-		domainPersistence.persist(exampleDotDe);
+		jpaTestHelper.persist(exampleDotDe);
 
 		// yoda creates this to temp email addresses ...
-		TempEmailAddress yodaAtExampleDotDe = new TempEmailAddress("yoda",
-				exampleDotDe);
-		tempEmailAddressPersistence.persist(yodaAtExampleDotDe);
-		TempEmailAddress test123AtExampleDotDe = new TempEmailAddress(
-				"test123", exampleDotDe);
-		tempEmailAddressPersistence.persist(test123AtExampleDotDe);
+		TempEmailAddress yodaAtExampleDotDe = new TempEmailAddress("yoda", exampleDotDe);
+		jpaTestHelper.persist(yodaAtExampleDotDe);
+		TempEmailAddress test123AtExampleDotDe = new TempEmailAddress("test123", exampleDotDe);
+		jpaTestHelper.persist(test123AtExampleDotDe);
 
 		// ... and adds them to his account
 		yoda.addTempEmailAddresses(yodaAtExampleDotDe, test123AtExampleDotDe);
 
-		userPersistence.merge(yoda);
+		jpaTestHelper.merge(yoda);
 
 		// successfully persisted everything was ;-)
-		User foundUser = userPersistence.find(userId);
-		assertThat(foundUser.getTempEmailAddresses()).hasSize(2).contains(
-				yodaAtExampleDotDe, test123AtExampleDotDe);
+		User foundUser = jpaTestHelper.find(userId, User.class);
+		assertThat(foundUser.getTempEmailAddresses()).hasSize(2).contains(yodaAtExampleDotDe,
+				test123AtExampleDotDe);
 
 
 		// lets remove this temp email address
 		yoda.removeTempEmailAddresses(yodaAtExampleDotDe);
-		userPersistence.merge(yoda);
+		jpaTestHelper.merge(yoda);
 
 		// in the account now only one temp email address is saved
-		foundUser = userPersistence.find(userId);
-		assertThat(foundUser.getTempEmailAddresses()).hasSize(1)
-				.doesNotContain(yodaAtExampleDotDe)
+		foundUser = jpaTestHelper.find(userId, User.class);
+		assertThat(foundUser.getTempEmailAddresses()).hasSize(1).doesNotContain(yodaAtExampleDotDe)
 				.contains(test123AtExampleDotDe);
 
 		// the deleted temp email address is not used anymore ...
-		TempEmailAddress notFoundAddress = tempEmailAddressPersistence
-				.find(yodaAtExampleDotDe.getId());
+		TempEmailAddress notFoundAddress = jpaTestHelper.find(yodaAtExampleDotDe.getId(), TempEmailAddress.class);
 
 		// and so it is removed from the database
 		assertThat(notFoundAddress).isNull();

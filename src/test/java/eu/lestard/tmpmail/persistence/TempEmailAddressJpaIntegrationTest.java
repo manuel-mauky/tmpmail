@@ -21,78 +21,70 @@ import org.junit.Test;
  */
 public class TempEmailAddressJpaIntegrationTest {
 
-	private JpaTestHelper<TempEmailAddress> tempEmailAddressPersistence;
-	private JpaTestHelper<Domain> domainPersistence;
+	private JpaTestHelper jpaTestHelper;
 
 	@Before
 	public void setup() {
-		tempEmailAddressPersistence = new JpaTestHelper<>(
-				TempEmailAddress.class);
-		domainPersistence = new JpaTestHelper<>(Domain.class);
+		jpaTestHelper = new JpaTestHelper();
 	}
 
 	@After
 	public void tearDown() {
-		tempEmailAddressPersistence.tearDown();
-		domainPersistence.tearDown();
+		jpaTestHelper.tearDown();
 	}
 
 	@Test
 	public void testCRUD() {
 		Domain domain = new Domain("example.org");
-		domainPersistence.persist(domain);
+		jpaTestHelper.persist(domain);
 
 		TempEmailAddress address = new TempEmailAddress("test123", domain);
 
 		String id = address.getId();
 
 		// CREATE
-		tempEmailAddressPersistence.persist(address);
+		jpaTestHelper.persist(address);
 
 		// READ
-		TempEmailAddress foundAddress = tempEmailAddressPersistence.find(id);
+		TempEmailAddress foundAddress = jpaTestHelper.find(id, TempEmailAddress.class);
 
 		assertThat(foundAddress).isEqualsToByComparingFields(address);
 
 		// There is no Update because the entity class is immutable.
 
 		// DELETE
-		tempEmailAddressPersistence.remove(foundAddress);
+		jpaTestHelper.remove(foundAddress, TempEmailAddress.class);
 
-		TempEmailAddress notFoundAddress = tempEmailAddressPersistence.find(id);
+		TempEmailAddress notFoundAddress = jpaTestHelper.find(id, TempEmailAddress.class);
 		assertThat(notFoundAddress).isNull();
 	}
 
 	@Test(expected = RollbackException.class)
 	public void testCombinationOfLocalPartAndDomainIsUnique() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
-		TempEmailAddress address = new TempEmailAddress("test123",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(address);
+		TempEmailAddress address = new TempEmailAddress("test123", exampleDotOrg);
+		jpaTestHelper.persist(address);
 
 
-		TempEmailAddress addressWithSameValues = new TempEmailAddress(
-				"test123", exampleDotOrg);
-		tempEmailAddressPersistence.persist(addressWithSameValues);
+		TempEmailAddress addressWithSameValues = new TempEmailAddress("test123", exampleDotOrg);
+		jpaTestHelper.persist(addressWithSameValues);
 	}
 
 	@Test
 	public void testLocalPartMustNotBeUniqueForDifferentDomains() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		Domain exampleDotCom = new Domain("example.com");
-		domainPersistence.persist(exampleDotCom);
+		jpaTestHelper.persist(exampleDotCom);
 
-		TempEmailAddress address = new TempEmailAddress("test123",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(address);
+		TempEmailAddress address = new TempEmailAddress("test123", exampleDotOrg);
+		jpaTestHelper.persist(address);
 
-		TempEmailAddress addressWithSameLocalPart = new TempEmailAddress(
-				"test123", exampleDotCom);
-		tempEmailAddressPersistence.persist(addressWithSameLocalPart);
+		TempEmailAddress addressWithSameLocalPart = new TempEmailAddress("test123", exampleDotCom);
+		jpaTestHelper.persist(addressWithSameLocalPart);
 
 		// no exception is thrown
 	}
@@ -101,15 +93,13 @@ public class TempEmailAddressJpaIntegrationTest {
 	@Test
 	public void testDomainMustNotBeUniqueForDifferentLocalParts() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
-		TempEmailAddress address = new TempEmailAddress("test123",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(address);
+		TempEmailAddress address = new TempEmailAddress("test123", exampleDotOrg);
+		jpaTestHelper.persist(address);
 
-		TempEmailAddress addressWithSameDomain = new TempEmailAddress(
-				"test456", exampleDotOrg);
-		tempEmailAddressPersistence.persist(addressWithSameDomain);
+		TempEmailAddress addressWithSameDomain = new TempEmailAddress("test456", exampleDotOrg);
+		jpaTestHelper.persist(addressWithSameDomain);
 
 		// no exception is thrown
 	}
@@ -117,23 +107,19 @@ public class TempEmailAddressJpaIntegrationTest {
 	@Test
 	public void testNamedQueryFindByLocalAndDomainPart() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
-		TempEmailAddress address1 = new TempEmailAddress("test123",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(address1);
+		TempEmailAddress address1 = new TempEmailAddress("test123", exampleDotOrg);
+		jpaTestHelper.persist(address1);
 
-		TempEmailAddress address2 = new TempEmailAddress("test456",
-				exampleDotOrg);
-		tempEmailAddressPersistence.persist(address2);
+		TempEmailAddress address2 = new TempEmailAddress("test456", exampleDotOrg);
+		jpaTestHelper.persist(address2);
 
 
-		EntityManager entityManager = tempEmailAddressPersistence
-				.getEntityManager();
+		EntityManager entityManager = jpaTestHelper.getEntityManager();
 
 		TypedQuery<TempEmailAddress> query = entityManager.createNamedQuery(
-				TempEmailAddress.FIND_BY_LOCAL_AND_DOMAIN_PART,
-				TempEmailAddress.class);
+				TempEmailAddress.FIND_BY_LOCAL_AND_DOMAIN_PART, TempEmailAddress.class);
 
 		query.setParameter("localpart", "test123");
 		query.setParameter("domainpart", "example.org");

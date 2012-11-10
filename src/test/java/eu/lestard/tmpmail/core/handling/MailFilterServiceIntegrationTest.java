@@ -33,9 +33,7 @@ import eu.lestard.tmpmail.persistence.TempEmailAddress;
  */
 public class MailFilterServiceIntegrationTest {
 
-	private JpaTestHelper<TempEmailAddress> tempEmailAddressPersistence;
-	private JpaTestHelper<Domain> domainPersistence;
-
+	private JpaTestHelper jpaTestHelper;
 
 	private MailFilterServiceImpl filterService;
 
@@ -43,8 +41,7 @@ public class MailFilterServiceIntegrationTest {
 
 	@Before
 	public void setup() {
-		tempEmailAddressPersistence = new JpaTestHelper<>(TempEmailAddress.class);
-		domainPersistence = new JpaTestHelper<>(Domain.class);
+		jpaTestHelper = new JpaTestHelper();
 
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
 
@@ -56,17 +53,16 @@ public class MailFilterServiceIntegrationTest {
 
 	@After
 	public void tearDown() {
-		tempEmailAddressPersistence.tearDown();
-		domainPersistence.tearDown();
+		jpaTestHelper.tearDown();
 	}
 
 	@Test
 	public void testMessageWithKnownAddressIsForwarded() throws MessagingException {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		TempEmailAddress test123 = new TempEmailAddress("test123", exampleDotOrg);
-		tempEmailAddressPersistence.persist(test123);
+		jpaTestHelper.persist(test123);
 
 
 		MimeMessage message = createMessage();
@@ -96,7 +92,7 @@ public class MailFilterServiceIntegrationTest {
 	@Test
 	public void testDomainIsKnownButNoTempMailMappingSaved() throws MessagingException {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		MimeMessage message = createMessage();
 		message.setRecipient(RecipientType.TO, new InternetAddress("test123@example.org"));
@@ -112,7 +108,7 @@ public class MailFilterServiceIntegrationTest {
 	@Test
 	public void testLoadDomainFromDatabase() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		Domain loadedDomain = filterService.loadDomainFromDatabase("example.org");
 
@@ -122,7 +118,7 @@ public class MailFilterServiceIntegrationTest {
 	@Test
 	public void testLoadDomainFromDatabaseFailNoDomainFound() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		Domain loadedDomain = filterService.loadDomainFromDatabase("example.com"); // .com
 
@@ -133,10 +129,10 @@ public class MailFilterServiceIntegrationTest {
 	@Test
 	public void testLoadTempEmailAddressFromDatabase() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		TempEmailAddress address1 = new TempEmailAddress("test123", exampleDotOrg);
-		tempEmailAddressPersistence.persist(address1);
+		jpaTestHelper.persist(address1);
 
 		TempEmailAddress loadedAddress = filterService.loadTempEmailAddressFromDatabase("test123", exampleDotOrg);
 
@@ -147,7 +143,7 @@ public class MailFilterServiceIntegrationTest {
 	@Test
 	public void testLoadTempEmailAddressFromDatabaseFailNoAddressPersisted() {
 		Domain exampleDotOrg = new Domain("example.org");
-		domainPersistence.persist(exampleDotOrg);
+		jpaTestHelper.persist(exampleDotOrg);
 
 		TempEmailAddress loadedAddress = filterService.loadTempEmailAddressFromDatabase("test", exampleDotOrg);
 

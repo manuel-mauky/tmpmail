@@ -6,16 +6,13 @@ import javax.persistence.Persistence;
 
 import org.junit.After;
 
-public class JpaTestHelper<T extends AbstractEntity> {
+public class JpaTestHelper {
 
 	public static final String PERSISTENCE_UNIT = "testdb";
 
 	private final EntityManagerFactory emf;
 
-	private final Class<T> clazz;
-
-	public JpaTestHelper(final Class<T> clazz) {
-		this.clazz = clazz;
+	public JpaTestHelper() {
 		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
 	}
 
@@ -25,8 +22,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 		// This is a HSQLDB specific feature to clear all data from the im
 		// memory database.
 		entityManager.getTransaction().begin();
-		entityManager.createNativeQuery("TRUNCATE SCHEMA public AND COMMIT")
-				.executeUpdate();
+		entityManager.createNativeQuery("TRUNCATE SCHEMA public AND COMMIT").executeUpdate();
 		entityManager.getTransaction().commit();
 		entityManager.close();
 
@@ -39,13 +35,13 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	}
 
 	/**
-	 * This method encapsulates the persist method of the entityManager incl
+	 * This method encapsulates the persist method of the entityManager incl.
 	 * transaction management.
 	 * 
 	 * @param entity
 	 *            the entity instance that has to be persisted.
 	 */
-	public void persist(final T entity) {
+	public void persist(final AbstractEntity entity) {
 		final EntityManager entityManager = emf.createEntityManager();
 		entityManager.getTransaction().begin();
 
@@ -63,7 +59,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 *            The id of the entity
 	 * @return The found entity or null if there is no entity with this Id.
 	 */
-	public T find(final String id) {
+	public <T> T find(final String id, final Class<T> clazz) {
 		final EntityManager entityManager = emf.createEntityManager();
 
 		final T entity = entityManager.find(clazz, id);
@@ -81,7 +77,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 * @param entity
 	 *            The entity that should be merged
 	 */
-	public void merge(final T entity) {
+	public void merge(final AbstractEntity entity) {
 		final EntityManager entityManager = emf.createEntityManager();
 
 		entityManager.getTransaction().begin();
@@ -97,11 +93,10 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 * @param entity
 	 *            The entity that should be removed.
 	 */
-	public void remove(final T entity) {
+	public <T> void remove(final AbstractEntity entity, final Class<T> clazz) {
 		final EntityManager entityManager = emf.createEntityManager();
 
-		final AbstractEntity foundEntity = entityManager.find(clazz,
-				entity.getId());
+		final T foundEntity = entityManager.find(clazz, entity.getId());
 
 		entityManager.getTransaction().begin();
 		entityManager.remove(foundEntity);
