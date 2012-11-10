@@ -1,10 +1,9 @@
 package eu.lestard.tmpmail.core.outgoing;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -19,6 +18,10 @@ import javax.persistence.TypedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.lestard.tmpmail.config.IntKey;
+import eu.lestard.tmpmail.config.IntValue;
+import eu.lestard.tmpmail.config.StringKey;
+import eu.lestard.tmpmail.config.StringValue;
 import eu.lestard.tmpmail.persistence.TempEmailAddress;
 import eu.lestard.tmpmail.persistence.User;
 
@@ -32,7 +35,10 @@ public class ForwardingServiceImpl implements ForwardingService {
 
 	private final int smtpPort;
 
-	public ForwardingServiceImpl(EntityManagerFactory emf, String smtpHost, Integer smtpPort) {
+	@Inject
+	public ForwardingServiceImpl(EntityManagerFactory emf,
+			@StringValue(StringKey.OUTGOING_SMTP_HOST) String smtpHost,
+			@IntValue(IntKey.OUTGOING_SMTP_PORT) Integer smtpPort) {
 		this.emf = emf;
 		this.smtpHost = smtpHost;
 		this.smtpPort = smtpPort;

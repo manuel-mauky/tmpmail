@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.inject.Inject;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -30,8 +31,7 @@ import eu.lestard.tmpmail.core.handling.MailFilterService;
  */
 public class InputMessageHandler implements MessageHandler {
 
-	private static final Logger LOG = LoggerFactory
-			.getLogger(InputMessageHandler.class);
+	private static final Logger LOG = LoggerFactory.getLogger(InputMessageHandler.class);
 
 	private final MailFilterService filterService;
 
@@ -41,6 +41,7 @@ public class InputMessageHandler implements MessageHandler {
 
 	private String recipient;
 
+	@Inject
 	public InputMessageHandler(final MailFilterService filterService) {
 		this.filterService = filterService;
 	}
@@ -59,8 +60,7 @@ public class InputMessageHandler implements MessageHandler {
 	@Override
 	public void done() {
 		try {
-			message.setRecipient(RecipientType.TO, new InternetAddress(
-					recipient));
+			message.setRecipient(RecipientType.TO, new InternetAddress(recipient));
 			message.setFrom(new InternetAddress(sender));
 			filterService.filterEmail(message);
 		} catch (MessagingException e) {

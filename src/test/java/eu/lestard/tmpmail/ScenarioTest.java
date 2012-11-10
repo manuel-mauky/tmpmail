@@ -15,8 +15,9 @@ import org.junit.Test;
 import org.subethamail.wiser.Wiser;
 import org.subethamail.wiser.WiserMessage;
 
-import eu.lestard.tmpmail.config.Configurator;
 import eu.lestard.tmpmail.config.IntKey;
+import eu.lestard.tmpmail.config.StringKey;
+import eu.lestard.tmpmail.config.internal.Configurator;
 import eu.lestard.tmpmail.core.incoming.MailInputListener;
 import eu.lestard.tmpmail.persistence.Domain;
 import eu.lestard.tmpmail.persistence.JpaTestHelper;
@@ -82,6 +83,13 @@ public class ScenarioTest {
 		weld = new Weld().initialize();
 
 		configurator = weld.instance().select(Configurator.class).get();
+
+
+		configurator.setValue(IntKey.INCOMMING_SMTP_PORT, INCOMMING_SMTP_PORT);
+		configurator.setValue(IntKey.OUTGOING_SMTP_PORT, OUTGOING_SMTP_PORT);
+		configurator.setValue(StringKey.OUTGOING_SMTP_HOST, OUTGOING_SMTP_HOST);
+
+
 		mailInputListener = weld.instance().select(MailInputListener.class).get();
 
 	}
@@ -91,13 +99,13 @@ public class ScenarioTest {
 		jpaTestHelper.tearDown();
 
 		wiser.stop();
+
+		mailInputListener.stop();
 	}
 
 	@Test
 	public void testScenario() {
 		defineDomainsThatAreHandled();
-
-		configureSmtpServer();
 
 		startMailInputListener();
 
@@ -113,10 +121,6 @@ public class ScenarioTest {
 	private void defineDomainsThatAreHandled() {
 		exampleDotOrg = new Domain("example.org");
 		jpaTestHelper.persist(exampleDotOrg);
-	}
-
-	private void configureSmtpServer() {
-		configurator.setValue(IntKey.INCOMMING_SMTP_PORT, INCOMMING_SMTP_PORT);
 	}
 
 	private void startMailInputListener() {
@@ -159,11 +163,11 @@ public class ScenarioTest {
 
 		final WiserMessage firstMessage = messages.get(0);
 
-		assertThat(firstMessage.getEnvelopeSender()).isEqualTo("darth.vader@darkside.example.com");
+		assertThat(firstMessage.getEnvelopeSender()).isEqualTo("darth.vader@darkside.example.de");
 		assertThat(firstMessage.getEnvelopeReceiver()).isEqualTo("luke@example.de");
 		try {
 			assertThat(firstMessage.getMimeMessage().getSubject()).isEqualTo("family affairs");
-			assertThat(firstMessage.getMimeMessage().getContent()).isEqualTo("I'm your Father");
+			assertThat(firstMessage.getMimeMessage().getContent().toString().trim()).isEqualTo("I'm your Father");
 		} catch (final MessagingException | IOException e) {
 			e.printStackTrace();
 		}

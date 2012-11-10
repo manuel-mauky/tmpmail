@@ -2,6 +2,7 @@ package eu.lestard.tmpmail.core.handling;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -25,6 +26,7 @@ public class MailFilterServiceImpl implements MailFilterService {
 
 	private final EntityManagerFactory emf;
 
+	@Inject
 	public MailFilterServiceImpl(final ForwardingService forwardingService, final EntityManagerFactory emf) {
 		this.forwardingService = forwardingService;
 		this.emf = emf;
