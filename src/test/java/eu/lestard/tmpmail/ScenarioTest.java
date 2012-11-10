@@ -74,14 +74,12 @@ public class ScenarioTest {
 
 	@Before
 	public void setup() {
-		userPersistence = new JpaTestHelper<User>();
-		userPersistence.init(User.class);
+		userPersistence = new JpaTestHelper<>(User.class);
 
-		domainPersistence = new JpaTestHelper<Domain>();
-		domainPersistence.init(Domain.class);
+		domainPersistence = new JpaTestHelper<>(Domain.class);
 
-		tempEmailAddressPersistence = new JpaTestHelper<TempEmailAddress>();
-		tempEmailAddressPersistence.init(TempEmailAddress.class);
+		tempEmailAddressPersistence = new JpaTestHelper<>(
+				TempEmailAddress.class);
 
 		wiser = new Wiser();
 		wiser.setPort(OUTGOING_SMTP_PORT);

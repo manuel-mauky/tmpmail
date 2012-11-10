@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,11 +19,18 @@ import org.junit.Test;
  * @author manuel.mauky
  * 
  */
-public class DomainJpaIntegrationTest extends JpaTestHelper<Domain> {
+public class DomainJpaIntegrationTest {
+
+	private JpaTestHelper<Domain> domainPersistence;
 
 	@Before
 	public void setup() {
-		init(Domain.class);
+		domainPersistence = new JpaTestHelper<>(Domain.class);
+	}
+
+	@After
+	public void tearDown() {
+		domainPersistence.tearDown();
 	}
 
 	@Test
@@ -32,19 +40,19 @@ public class DomainJpaIntegrationTest extends JpaTestHelper<Domain> {
 		String id = domain.getId();
 
 		// CREATE
-		persist(domain);
+		domainPersistence.persist(domain);
 
 		// READ
-		Domain foundDomain = find(id);
+		Domain foundDomain = domainPersistence.find(id);
 
 		assertThat(foundDomain).isEqualsToByComparingFields(domain);
 
 		// There is no Update because the entity class is immutable
 
 		// DELETE
-		remove(foundDomain);
+		domainPersistence.remove(foundDomain);
 
-		Domain notFoundDomain = find(id);
+		Domain notFoundDomain = domainPersistence.find(id);
 		assertThat(notFoundDomain).isNull();
 	}
 
@@ -52,20 +60,20 @@ public class DomainJpaIntegrationTest extends JpaTestHelper<Domain> {
 	@Test(expected = RollbackException.class)
 	public void testDomainAsStringIsUnique() {
 		Domain domain = new Domain("example.com");
-		persist(domain);
+		domainPersistence.persist(domain);
 
 		Domain domainWithSameValue = new Domain("example.com");
 
-		persist(domainWithSameValue);
+		domainPersistence.persist(domainWithSameValue);
 	}
 
 	@Test
 	public void testNamedQueryFindByDomainName() {
 		Domain domain = new Domain("example.com");
-		persist(domain);
+		domainPersistence.persist(domain);
 
 
-		EntityManager entityManager = getEntityManager();
+		EntityManager entityManager = domainPersistence.getEntityManager();
 
 		TypedQuery<Domain> query = entityManager.createNamedQuery(
 				Domain.FIND_BY_DOMAIN_NAME, Domain.class);

@@ -16,7 +16,7 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 @Entity
 @Table(name = "DOMAINS")
-@NamedQueries({ @NamedQuery(name = Domain.FIND_BY_DOMAIN_NAME, query = "SELECT d FROM Domain d WHERE d.domainAsString = :domainName;") })
+@NamedQueries({ @NamedQuery(name = Domain.FIND_BY_DOMAIN_NAME, query = "SELECT d FROM Domain d WHERE d.domainAsString LIKE :domainName") })
 public class Domain extends AbstractEntity {
 
 	public static final String FIND_BY_DOMAIN_NAME = "Domain.find_by_domain_name";

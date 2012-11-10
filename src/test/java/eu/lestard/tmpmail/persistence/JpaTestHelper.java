@@ -10,17 +10,15 @@ public class JpaTestHelper<T extends AbstractEntity> {
 
 	public static final String PERSISTENCE_UNIT = "testdb";
 
-	private EntityManagerFactory emf;
+	private final EntityManagerFactory emf;
 
-	private Class<T> clazz;
+	private final Class<T> clazz;
 
-
-	public void init(final Class<T> clazz) {
+	public JpaTestHelper(final Class<T> clazz) {
 		this.clazz = clazz;
 		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
 	}
 
-	@After
 	public void tearDown() {
 		EntityManager entityManager = emf.createEntityManager();
 
@@ -47,7 +45,7 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	 * @param entity
 	 *            the entity instance that has to be persisted.
 	 */
-	public void persist(final AbstractEntity entity) {
+	public void persist(final T entity) {
 		final EntityManager entityManager = emf.createEntityManager();
 		entityManager.getTransaction().begin();
 
@@ -76,23 +74,25 @@ public class JpaTestHelper<T extends AbstractEntity> {
 	}
 
 
-	/**
-	 * This method can be used to find persisted instances of another type then
-	 * the generic type of this class.
-	 * 
-	 * @param clazz
-	 *            the type of the instance that should be found
-	 * @param id
-	 *            the id of the instance that should be found
-	 * @return the found entity or null if no entity with this id can be found.
-	 */
-	public <T2> T2 find(final Class<? extends T2> clazz, final String id) {
-		final EntityManager entityManager = emf.createEntityManager();
-
-		final T2 entity = entityManager.find(clazz, id);
-		entityManager.close();
-		return entity;
-	}
+	// /**
+	// * This method can be used to find persisted instances of another type
+	// then
+	// * the generic type of this class.
+	// *
+	// * @param clazz
+	// * the type of the instance that should be found
+	// * @param id
+	// * the id of the instance that should be found
+	// * @return the found entity or null if no entity with this id can be
+	// found.
+	// */
+	// public <T2> T2 find(final Class<? extends T2> clazz, final String id) {
+	// final EntityManager entityManager = emf.createEntityManager();
+	//
+	// final T2 entity = entityManager.find(clazz, id);
+	// entityManager.close();
+	// return entity;
+	// }
 
 
 	/**

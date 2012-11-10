@@ -43,11 +43,9 @@ public class MailFilterServiceIntegrationTest {
 
 	@Before
 	public void setup() {
-		tempEmailAddressPersistence = new JpaTestHelper<>();
-		tempEmailAddressPersistence.init(TempEmailAddress.class);
-
-		domainPersistence = new JpaTestHelper<>();
-		domainPersistence.init(Domain.class);
+		tempEmailAddressPersistence = new JpaTestHelper<>(
+				TempEmailAddress.class);
+		domainPersistence = new JpaTestHelper<>(Domain.class);
 
 		EntityManagerFactory emf = Persistence
 				.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
@@ -143,6 +141,26 @@ public class MailFilterServiceIntegrationTest {
 		assertThat(loadedDomain).isNull();
 	}
 
+
+	@Test
+	public void testLoadTempEmailAddressFromDatabase() {
+		Domain exampleDotOrg = new Domain("example.org");
+		domainPersistence.persist(exampleDotOrg);
+
+		TempEmailAddress address1 = new TempEmailAddress("test123",
+				exampleDotOrg);
+		tempEmailAddressPersistence.persist(address1);
+		TempEmailAddress address2 = new TempEmailAddress("test456",
+				exampleDotOrg);
+		tempEmailAddressPersistence.persist(address2);
+
+
+		TempEmailAddress loadedAddress = filterService
+				.loadTempEmailAddressFromDatabase("test123", exampleDotOrg);
+
+		assertThat(loadedAddress).isEqualTo(address1);
+
+	}
 
 	/**
 	 * For the tests there doesn't need to be a valid email session. Sadly

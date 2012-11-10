@@ -4,6 +4,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import javax.persistence.RollbackException;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,11 +16,25 @@ import org.junit.Test;
  * @author manuel.mauky
  * 
  */
-public class UserJpaIntegrationTest extends JpaTestHelper<User> {
+public class UserJpaIntegrationTest {
+
+	private JpaTestHelper<User> userPersistence;
+	private JpaTestHelper<Domain> domainPersistence;
+	private JpaTestHelper<TempEmailAddress> tempEmailAddressPersistence;
 
 	@Before
 	public void setup() {
-		init(User.class);
+		userPersistence = new JpaTestHelper<>(User.class);
+		domainPersistence = new JpaTestHelper<>(Domain.class);
+		tempEmailAddressPersistence = new JpaTestHelper<>(
+				TempEmailAddress.class);
+	}
+
+	@After
+	public void tearDown() {
+		userPersistence.tearDown();
+		domainPersistence.tearDown();
+		tempEmailAddressPersistence.tearDown();
 	}
 
 	@Test
@@ -29,10 +44,10 @@ public class UserJpaIntegrationTest extends JpaTestHelper<User> {
 		String id = user.getId();
 
 		// CREATE
-		persist(user);
+		userPersistence.persist(user);
 
 		// READ
-		User foundUser = find(id);
+		User foundUser = userPersistence.find(id);
 
 		assertThat(foundUser).isEqualsToByComparingFields(user);
 
@@ -41,17 +56,17 @@ public class UserJpaIntegrationTest extends JpaTestHelper<User> {
 		foundUser.setPasswordHash("secredPasswordHash");
 		foundUser.setPasswordSalt("secredPasswordSalt");
 
-		merge(foundUser);
+		userPersistence.merge(foundUser);
 
-		User updatedUser = find(id);
+		User updatedUser = userPersistence.find(id);
 
 		assertThat(updatedUser).isEqualsToByComparingFields(foundUser);
 
 
 		// DELETE
-		remove(updatedUser);
+		userPersistence.remove(updatedUser);
 
-		User notFoundUser = find(id);
+		User notFoundUser = userPersistence.find(id);
 		assertThat(notFoundUser).isNull();
 	}
 
@@ -59,57 +74,57 @@ public class UserJpaIntegrationTest extends JpaTestHelper<User> {
 	@Test(expected = RollbackException.class)
 	public void testEmailIsUnique() {
 		User user = new User("yoda@example.org");
-		persist(user);
+		userPersistence.persist(user);
 
 		User userWithSameEmail = new User("yoda@example.org");
 
 		// user has the same email address so an exception has to
 		// be thrown.
-		persist(userWithSameEmail);
+		userPersistence.persist(userWithSameEmail);
 	}
 
 	@Test
 	public void testHandlingOfTempEmailAddresses() {
 		// yoda registeres an account
 		User yoda = new User("yoda@example.org");
-		persist(yoda);
+		userPersistence.persist(yoda);
 		String userId = yoda.getId();
 
 		Domain exampleDotDe = new Domain("example.de");
-		persist(exampleDotDe);
+		domainPersistence.persist(exampleDotDe);
 
 		// yoda creates this to temp email addresses ...
 		TempEmailAddress yodaAtExampleDotDe = new TempEmailAddress("yoda",
 				exampleDotDe);
-		persist(yodaAtExampleDotDe);
+		tempEmailAddressPersistence.persist(yodaAtExampleDotDe);
 		TempEmailAddress test123AtExampleDotDe = new TempEmailAddress(
 				"test123", exampleDotDe);
-		persist(test123AtExampleDotDe);
+		tempEmailAddressPersistence.persist(test123AtExampleDotDe);
 
 		// ... and adds them to his account
 		yoda.addTempEmailAddresses(yodaAtExampleDotDe, test123AtExampleDotDe);
 
-		merge(yoda);
+		userPersistence.merge(yoda);
 
 		// successfully persisted everything was ;-)
-		User foundUser = find(userId);
+		User foundUser = userPersistence.find(userId);
 		assertThat(foundUser.getTempEmailAddresses()).hasSize(2).contains(
 				yodaAtExampleDotDe, test123AtExampleDotDe);
 
 
 		// lets remove this temp email address
 		yoda.removeTempEmailAddresses(yodaAtExampleDotDe);
-		merge(yoda);
+		userPersistence.merge(yoda);
 
 		// in the account now only one temp email address is saved
-		foundUser = find(userId);
+		foundUser = userPersistence.find(userId);
 		assertThat(foundUser.getTempEmailAddresses()).hasSize(1)
 				.doesNotContain(yodaAtExampleDotDe)
 				.contains(test123AtExampleDotDe);
 
 		// the deleted temp email address is not used anymore ...
-		TempEmailAddress notFoundAddress = find(TempEmailAddress.class,
-				yodaAtExampleDotDe.getId());
+		TempEmailAddress notFoundAddress = tempEmailAddressPersistence
+				.find(yodaAtExampleDotDe.getId());
 
 		// and so it is removed from the database
 		assertThat(notFoundAddress).isNull();
