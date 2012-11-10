@@ -2,6 +2,8 @@ package eu.lestard.tmpmail.persistence;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -14,7 +16,10 @@ import org.hibernate.validator.constraints.NotBlank;
  */
 @Entity
 @Table(name = "DOMAINS")
+@NamedQueries({ @NamedQuery(name = Domain.FIND_BY_DOMAIN_NAME, query = "SELECT d FROM Domain d WHERE d.domainAsString = :domainName;") })
 public class Domain extends AbstractEntity {
+
+	public static final String FIND_BY_DOMAIN_NAME = "Domain.find_by_domain_name";
 
 	@NotBlank
 	@Column(unique = true)

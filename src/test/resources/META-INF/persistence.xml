@@ -18,6 +18,7 @@
 			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
 			<property name="eclipselink.ddl-generation.output-mode"
 				value="database" />
+			<property name="eclipselink.target-database" value="HSQL"/>
 			<property name="eclipselink.logging.level" value="OFF"/>
 		</properties>
 	</persistence-unit>

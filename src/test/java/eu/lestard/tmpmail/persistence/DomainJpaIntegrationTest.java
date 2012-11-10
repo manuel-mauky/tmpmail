@@ -2,7 +2,11 @@ package eu.lestard.tmpmail.persistence;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.List;
+
+import javax.persistence.EntityManager;
 import javax.persistence.RollbackException;
+import javax.persistence.TypedQuery;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,8 +57,24 @@ public class DomainJpaIntegrationTest extends JpaTestHelper<Domain> {
 		Domain domainWithSameValue = new Domain("example.com");
 
 		persist(domainWithSameValue);
+	}
+
+	@Test
+	public void testNamedQueryFindByDomainName() {
+		Domain domain = new Domain("example.com");
+		persist(domain);
 
 
+		EntityManager entityManager = getEntityManager();
+
+		TypedQuery<Domain> query = entityManager.createNamedQuery(
+				Domain.FIND_BY_DOMAIN_NAME, Domain.class);
+
+		query.setParameter("domainName", "example.com");
+
+		List<Domain> resultList = query.getResultList();
+
+		assertThat(resultList).hasSize(1).contains(domain);
 	}
 
 }
