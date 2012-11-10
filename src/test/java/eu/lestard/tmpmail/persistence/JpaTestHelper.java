@@ -8,7 +8,7 @@ import org.junit.After;
 
 public class JpaTestHelper<T extends AbstractEntity> {
 
-	private static final String PERSISTENCE_UNIT = "testdb";
+	public static final String PERSISTENCE_UNIT = "testdb";
 
 	private EntityManagerFactory emf;
 
@@ -22,9 +22,23 @@ public class JpaTestHelper<T extends AbstractEntity> {
 
 	@After
 	public void tearDown() {
+		EntityManager entityManager = emf.createEntityManager();
+
+		// This is a HSQLDB specific feature to clear all data from the im
+		// memory database.
+		entityManager.getTransaction().begin();
+		entityManager.createNativeQuery("TRUNCATE SCHEMA public AND COMMIT")
+				.executeUpdate();
+		entityManager.getTransaction().commit();
+		entityManager.close();
+
 		emf.close();
 	}
 
+
+	protected EntityManager getEntityManager() {
+		return emf.createEntityManager();
+	}
 
 	/**
 	 * This method encapsulates the persist method of the entityManager incl

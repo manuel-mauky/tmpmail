@@ -1,15 +1,18 @@
 package eu.lestard.tmpmail.core.handling;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,13 +23,21 @@ import eu.lestard.tmpmail.persistence.Domain;
 import eu.lestard.tmpmail.persistence.JpaTestHelper;
 import eu.lestard.tmpmail.persistence.TempEmailAddress;
 
+/**
+ * This is an integration test that verifies the behavior of the
+ * {@link MailFilterServiceImpl} and it't interaction with the JPA persistence
+ * context.
+ * 
+ * @author manuel.mauky
+ * 
+ */
 public class MailFilterServiceIntegrationTest {
 
 	private JpaTestHelper<TempEmailAddress> tempEmailAddressPersistence;
 	private JpaTestHelper<Domain> domainPersistence;
 
 
-	private MailFilterService filterService;
+	private MailFilterServiceImpl filterService;
 
 	private ForwardingService forwardingServiceMock;
 
@@ -38,9 +49,12 @@ public class MailFilterServiceIntegrationTest {
 		domainPersistence = new JpaTestHelper<>();
 		domainPersistence.init(Domain.class);
 
+		EntityManagerFactory emf = Persistence
+				.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
+
 		forwardingServiceMock = mock(ForwardingService.class);
 
-		filterService = new MailFilterServiceImpl(forwardingServiceMock);
+		filterService = new MailFilterServiceImpl(forwardingServiceMock, emf);
 
 	}
 
@@ -106,23 +120,28 @@ public class MailFilterServiceIntegrationTest {
 				any(MimeMessage.class), any(TempEmailAddress.class));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testFailMessageIsNull() {
-		filterService.filterEmail(null);
-	}
-
 
 	@Test
-	public void testFailMessageHasNoRecipient() {
-		MimeMessage message = createMessage();
+	public void testLoadDomainFromDatabase() {
+		Domain exampleDotOrg = new Domain("example.org");
+		domainPersistence.persist(exampleDotOrg);
 
-		filterService.filterEmail(message);
+		Domain loadedDomain = filterService
+				.loadDomainFromDatabase("example.org");
 
-		// no message is forwarded
-		verify(forwardingServiceMock, never()).forwardMessage(
-				any(MimeMessage.class), any(TempEmailAddress.class));
+		assertThat(loadedDomain).isEqualTo(exampleDotOrg);
 	}
 
+	@Test
+	public void testLoadDomainFromDatabaseFailNoDomainFound() {
+		Domain exampleDotOrg = new Domain("example.org");
+		domainPersistence.persist(exampleDotOrg);
+
+		Domain loadedDomain = filterService
+				.loadDomainFromDatabase("example.com"); // .com
+
+		assertThat(loadedDomain).isNull();
+	}
 
 
 	/**
