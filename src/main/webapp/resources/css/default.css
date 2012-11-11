@@ -1,0 +1,25 @@
+/* default css configurations*/
+
+* {
+	margin:0;
+	padding:0;
+}
+
+html, body {
+	height:100%;
+	width:100%;
+	background-color:#eee;
+	color:#444;
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+
+a {
+	color:#111;
+	text-decoration: none;
+}
+
+a:hover {
+	color:#666;
+}
+

@@ -1,5 +1,6 @@
 package eu.lestard.tmpmail.persistence;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import javax.persistence.Id;
@@ -15,7 +16,8 @@ import javax.persistence.MappedSuperclass;
  * @author manuel.mauky
  */
 @MappedSuperclass
-public abstract class AbstractEntity {
+public abstract class AbstractEntity implements Serializable {
+	private static final long serialVersionUID = -906169673642621559L;
 
 	@Id
 	private final String id;

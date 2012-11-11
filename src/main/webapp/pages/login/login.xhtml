@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/layout.xhtml">
+
+	<ui:define name="content">
+		<h2>Login</h2>
+
+		<h:form id="loginForm" rendered="#{not loggedIn}">
+			<h:panelGrid columns="2">
+				<h:outputLabel
+					for="emailAddress"
+					value="Email-Adresse:" />
+				<h:panelGroup>
+					<p:inputText
+						id="emailAddress"
+						label="Email-Adresse"
+						value="#{loginController.emailAddress}" />
+					<h:message for="emailAddress" />
+				</h:panelGroup>
+
+				<h:outputLabel
+					for="password"
+					value="Password:" />
+				<h:panelGroup>
+					<p:password
+						id="password"
+						label="Password"
+						value="#{loginController.password}" />
+					<h:message for="password" />
+				</h:panelGroup>
+
+			</h:panelGrid>
+				<h:commandButton
+					value="Login"
+					action="#{loginController.login}" />
+		</h:form>
+		
+		<h:panelGroup rendered="#{loggedIn}">
+			<p>Sie sind bereits eingeloggt. Wenn sie einen neuen Account anlegen möchten,
+			loggen Sie sich bitte zunächst aus.</p>
+			<h:form>
+				<h:commandLink value="Logout" action="#{loginController.logout}"/>
+			</h:form>
+		</h:panelGroup>
+	</ui:define>
+
+</ui:composition>

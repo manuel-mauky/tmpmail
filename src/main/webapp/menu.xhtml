@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ul>
+		<h:panelGroup rendered="#{not loggedIn}">
+			<h:link
+				value="Login"
+				outcome="pretty:login" />
+			<p:spacer width="10px" />
+			<h:link
+				value="Registrieren"
+				outcome="pretty:register" />
+		</h:panelGroup>
+		
+		<h:panelGroup rendered="#{loggedIn}">
+			<h:form>
+				<h:commandLink value="Logout" action="#{loginController.logout}"/>
+			</h:form>
+		</h:panelGroup>
+
+	</ul>
+
+</ui:composition>
+
+
