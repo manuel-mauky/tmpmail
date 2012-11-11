@@ -62,6 +62,7 @@ public class InputMessageHandler implements MessageHandler {
 		try {
 			message.setRecipient(RecipientType.TO, new InternetAddress(recipient));
 			message.setFrom(new InternetAddress(sender));
+			LOG.debug("new Mail was catched.");
 			filterService.filterEmail(message);
 		} catch (MessagingException e) {
 			LOG.error(e.getMessage(), e);
@@ -71,6 +72,7 @@ public class InputMessageHandler implements MessageHandler {
 
 	@Override
 	public void from(final String from) {
+		LOG.debug("New Mail from: " + from);
 		sender = from;
 	}
 
@@ -79,6 +81,7 @@ public class InputMessageHandler implements MessageHandler {
 	 */
 	@Override
 	public void recipient(final String recipient) {
+		LOG.debug("New Mail to: " + recipient);
 		if (this.recipient == null) {
 			this.recipient = recipient;
 		}

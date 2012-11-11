@@ -47,10 +47,24 @@ public class MailInputListenerImpl implements MailInputListener {
 	protected MailInputListenerImpl() {
 	}
 
+	/**
+	 * This method is called by the CDI container when the
+	 * {@link ServletContext} is initialized. This Event is fired by the JBoss
+	 * Solder framework.
+	 * 
+	 * @param ctx
+	 */
 	public void start(@Observes @Initialized ServletContext ctx) {
 		this.start();
 	}
 
+	/**
+	 * This method is called by the CDI container when the
+	 * {@link ServletContext} is destroyed. This Event is fired by the JBoss
+	 * Solder framework.
+	 * 
+	 * @param ctx
+	 */
 	public void stop(@Observes @Destroyed ServletContext ctx) {
 		this.stop();
 	}

@@ -12,4 +12,14 @@ public enum StringKey {
 	 */
 	OUTGOING_SMTP_HOST,
 
+	/**
+	 * The username that is used to connect to the outgoing SMTP server.
+	 */
+	OUTGOING_SMTP_USERNAME,
+
+	/**
+	 * The password that is used to connect to the outgoing SMTP server.
+	 */
+	OUTGOING_SMTP_PASSWORD
+
 }

@@ -16,7 +16,17 @@ public class JpaTestHelper {
 		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
 	}
 
+	public EntityManagerFactory getEmf() {
+		return emf;
+	}
+
 	public void tearDown() {
+		cleanDatabase();
+
+		emf.close();
+	}
+
+	public void cleanDatabase() {
 		EntityManager entityManager = emf.createEntityManager();
 
 		// This is a HSQLDB specific feature to clear all data from the im
@@ -25,8 +35,6 @@ public class JpaTestHelper {
 		entityManager.createNativeQuery("TRUNCATE SCHEMA public AND COMMIT").executeUpdate();
 		entityManager.getTransaction().commit();
 		entityManager.close();
-
-		emf.close();
 	}
 
 

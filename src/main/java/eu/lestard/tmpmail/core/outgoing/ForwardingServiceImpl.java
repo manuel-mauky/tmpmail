@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.inject.Inject;
+import javax.mail.Authenticator;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.URLName;
@@ -35,19 +37,32 @@ public class ForwardingServiceImpl implements ForwardingService {
 
 	private final int smtpPort;
 
+	private final String username;
+
+	private final String password;
+
 	@Inject
 	public ForwardingServiceImpl(EntityManagerFactory emf,
 			@StringValue(StringKey.OUTGOING_SMTP_HOST) String smtpHost,
-			@IntValue(IntKey.OUTGOING_SMTP_PORT) Integer smtpPort) {
+			@IntValue(IntKey.OUTGOING_SMTP_PORT) Integer smtpPort,
+			@StringValue(StringKey.OUTGOING_SMTP_USERNAME) String username,
+			@StringValue(StringKey.OUTGOING_SMTP_PASSWORD) String password) {
 		this.emf = emf;
 		this.smtpHost = smtpHost;
 		this.smtpPort = smtpPort;
+		this.username = username;
+		this.password = password;
 	}
 
 	@Override
 	public void forwardMessage(MimeMessage message, final TempEmailAddress tempEmailAddress) {
+		LOG.debug("Message will now be forwarded");
 
 		User user = loadUserFromDatabase(tempEmailAddress);
+
+		if (user == null) {
+			return;
+		}
 
 		replaceRecipient(message, user);
 
@@ -55,18 +70,30 @@ public class ForwardingServiceImpl implements ForwardingService {
 	}
 
 	protected void sendMessage(final MimeMessage message) {
+		LOG.debug("Prepare for Sending the message");
+
 		Properties properties = new Properties();
 		properties.put("mail.smtp.host", smtpHost);
+		properties.put("mail.smtp.port", smtpPort);
+		properties.put("mail.smtp.starttls.enable", "true");
 
 		try {
-			Session session = Session.getDefaultInstance(properties);
-			Transport transport = session.getTransport(new URLName("smtp", smtpHost, smtpPort, null, "", ""));
+			Session session = Session.getInstance(properties, new Authenticator() {
+				@Override
+				protected PasswordAuthentication getPasswordAuthentication() {
+					return new PasswordAuthentication(username, password);
+				}
+			});
+			Transport transport = session.getTransport(new URLName("smtp", smtpHost, smtpPort, null, username,
+					password));
 
 			MimeMessage messageToSend = new MimeMessage(message);
 
 			transport.connect();
 			transport.sendMessage(messageToSend, message.getAllRecipients());
 			transport.close();
+
+			LOG.debug("Message was send");
 
 		} catch (MessagingException e) {
 			LOG.error(e.getMessage(), e);
@@ -77,6 +104,8 @@ public class ForwardingServiceImpl implements ForwardingService {
 	protected void replaceRecipient(MimeMessage message, final User user) {
 		try {
 			message.setRecipient(RecipientType.TO, new InternetAddress(user.getEmailAddress()));
+
+			LOG.debug("Recipient was replaced");
 		} catch (final MessagingException e) {
 			LOG.error(e.getMessage(), e);
 		}

@@ -32,8 +32,13 @@ public class MailFilterServiceImpl implements MailFilterService {
 		this.emf = emf;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void filterEmail(final MimeMessage emailMessage) {
+		LOG.debug("Message will be filtered");
+
 		if (emailMessage == null) {
 			throw new IllegalArgumentException("The Param MimeMessage must not be null.");
 		}
@@ -42,9 +47,12 @@ public class MailFilterServiceImpl implements MailFilterService {
 
 		String domainPart = getDomainPart(recipientAddress);
 
+		LOG.debug("Recipient:" + recipientAddress);
+
 		Domain domain = loadDomainFromDatabase(domainPart);
 
 		if (domain == null) {
+			LOG.debug("Domain >" + domainPart + "< not found");
 			return;
 		}
 
@@ -53,7 +61,10 @@ public class MailFilterServiceImpl implements MailFilterService {
 		TempEmailAddress tempEmailAddress = loadTempEmailAddressFromDatabase(localPart, domain);
 
 		if (tempEmailAddress != null) {
+			LOG.debug("TempEmailAddress with " + localPart + ", " + domain.getDomainAsString() + " was found.");
 			forwardingService.forwardMessage(emailMessage, tempEmailAddress);
+		} else {
+			LOG.debug("No TempEmailAddress with given values found");
 		}
 	}
 

@@ -32,6 +32,8 @@ public class ConfiguratorImpl implements Configurator {
 		setValue(IntKey.INCOMMING_SMTP_PORT, 25000);
 		setValue(IntKey.OUTGOING_SMTP_PORT, 20000);
 		setValue(StringKey.OUTGOING_SMTP_HOST, "localhost");
+		setValue(StringKey.OUTGOING_SMTP_USERNAME, "");
+		setValue(StringKey.OUTGOING_SMTP_PASSWORD, "");
 	}
 
 	@Override

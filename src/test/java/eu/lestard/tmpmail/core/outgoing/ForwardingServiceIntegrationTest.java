@@ -52,9 +52,9 @@ public class ForwardingServiceIntegrationTest {
 	public void setup() {
 		jpaTestHelper = new JpaTestHelper();
 
-		EntityManagerFactory emf = Persistence.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
+		EntityManagerFactory emf = jpaTestHelper.getEmf();
 
-		forwardingService = new ForwardingServiceImpl(emf, OUTGOING_SMTP_HOST, OUTGOING_SMTP_PORT);
+		forwardingService = new ForwardingServiceImpl(emf, OUTGOING_SMTP_HOST, OUTGOING_SMTP_PORT, "", "");
 
 		wiser = new Wiser();
 		wiser.setPort(OUTGOING_SMTP_PORT);
@@ -106,6 +106,7 @@ public class ForwardingServiceIntegrationTest {
 
 	@Test
 	public void testLoadUserFromDatabase() {
+
 		User user = new User(USERS_REAL_ADDRESS);
 		jpaTestHelper.persist(user);
 
