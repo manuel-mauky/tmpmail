@@ -34,5 +34,10 @@
 		<pattern value="/register/failed"/>
 		<view-id value="/pages/registration/failed.xhtml"/>
 	</url-mapping>
+	
+	<url-mapping id="adminbackend">
+		<pattern value="/adminbackend"/>
+		<view-id value="/pages/admin/adminbackend.xhtml"/>
+	</url-mapping>
 
 </pretty-config>

@@ -153,4 +153,21 @@ public class UserJpaIntegrationTest {
 
 	}
 
+	@Test
+	public void testNamedQueryFindByEmailAddress() {
+		User yoda = new User("yoda@example.org");
+		jpaTestHelper.persist(yoda);
+
+		EntityManager entityManager = jpaTestHelper.getEntityManager();
+
+		TypedQuery<User> query = entityManager.createNamedQuery(User.FIND_BY_EMAIL_ADDRESS, User.class);
+
+		query.setParameter("emailAddress", "yoda@example.org");
+
+		List<User> resultList = query.getResultList();
+		assertThat(resultList).hasSize(1).contains(yoda);
+
+
+	}
+
 }

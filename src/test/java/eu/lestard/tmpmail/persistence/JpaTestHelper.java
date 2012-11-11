@@ -42,7 +42,7 @@ public class JpaTestHelper {
 	}
 
 
-	protected EntityManager getEntityManager() {
+	public EntityManager getEntityManager() {
 		return emf.createEntityManager();
 	}
 

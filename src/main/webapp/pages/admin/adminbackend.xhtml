@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/layout.xhtml">
+
+	<ui:define name="content">
+		<h2>AdminBackend</h2>
+		
+		
+		<h3>Domains:</h3>
+			<ul>
+			<ui:repeat var="domain" value="#{adminBackendController.domains}">
+				<li>#{domain.domainAsString}</li>
+			</ui:repeat>
+			</ul>
+			
+			<p>Neue Domain hinzufügen:</p>
+			<h:form>
+				<h:inputText id="domain" value="#{adminBackendController.newDomain}"/>
+				
+				<h:commandButton value="Hinzufügen" action="#{adminBackendController.addDomain}"/>
+			</h:form>
+			
+			
+		
+		<hr/>
+		
+		<h3>SMTP-Server Einstellungen</h3>
+		<h:form>
+			<h:panelGrid columns="2">
+				<h:outputLabel
+					for="outgoingSmtpPort"
+					value="Outgoing SMTP Port" />
+				<h:inputText
+					id="outgoingSmtpPort"
+					value="#{adminBackendController.outgoingSmtpPort}" />
+
+
+				<h:outputLabel
+					for="outgoingSmtpHost"
+					value="Outgoing SMTP Host" />
+				<h:inputText
+					id="outgoingSmtpHost"
+					value="#{adminBackendController.outgoingSmtpHost}" />
+
+				<h:outputLabel
+					for="outgoingSmtpUsername"
+					value="Outgoing SMTP Username" />
+				<h:inputText
+					id="outgoingSmtpUsername"
+					value="#{adminBackendController.outgoingSmtpUsername}" />
+
+				<h:outputLabel
+					for="outgoingSmtpPassword"
+					value="Outgoing SMTP Password" />
+				<h:inputSecret
+					id="outgoingSmtpPassword"
+					value="#{adminBackendController.outgoingSmtpPassword}" />
+
+			</h:panelGrid>
+
+			<h:commandButton
+				value="Speichern"
+				action="#{adminBackendController.save}" />
+		</h:form>
+
+		<h3>Erklärung:</h3>
+		<p>Die Ausgehenden/Weitergeleiteten Emails müssen von einem SMTP-Server entgegen genommen und weitergeschickt
+			werden, damit die Emails auch im Postfach des Empfängers ankommen.</p>
+		<p>Damit das vernünftig klappt, müssen hier die Daten des SMTP-Servers eingetragen werden.</p>
+		<p>Leider unterstützt das Programm bisher nur Verschlüsslung mit STARTTLS.</p>
+
+		<p>
+			<strong>Bitte Beachten Sie: Leider werden die Werte in der aktuellen Version noch nicht dauerhaft
+				gespeichert. Nach einem Server-Neustart müssen die Werte leider erneut eingegeben werden. In einer der kommenden
+				Versionen wird das noch verbessert.</strong>
+		</p>
+	</ui:define>
+
+</ui:composition>

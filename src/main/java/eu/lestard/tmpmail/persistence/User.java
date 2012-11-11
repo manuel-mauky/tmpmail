@@ -22,11 +22,15 @@ import org.hibernate.validator.constraints.Email;
  */
 @Entity
 @Table(name = "USERS")
-@NamedQueries({ @NamedQuery(name = User.FIND_BY_TEMP_EMAIL_ADDRESS_ID,
-		query = "SELECT u FROM User u join u.tempEmailAddresses e WHERE e.id = :id") })
+@NamedQueries({
+		@NamedQuery(name = User.FIND_BY_EMAIL_ADDRESS,
+				query = "SELECT u FROM User u WHERE u.emailAddress = :emailAddress"),
+		@NamedQuery(name = User.FIND_BY_TEMP_EMAIL_ADDRESS_ID,
+				query = "SELECT u FROM User u join u.tempEmailAddresses e WHERE e.id = :id") })
 public class User extends AbstractEntity {
 
 	public static final String FIND_BY_TEMP_EMAIL_ADDRESS_ID = "User.find_by_temp_email_address_id";
+	public static final String FIND_BY_EMAIL_ADDRESS = "User.find_by_email_address";
 
 
 	@Email
