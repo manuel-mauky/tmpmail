@@ -12,26 +12,28 @@ import eu.lestard.tmpmail.config.StringKey;
 import eu.lestard.tmpmail.config.internal.Configurator;
 import eu.lestard.tmpmail.persistence.Domain;
 
+/**
+ * The responsibility of the {@link AdminBackendController} is to get
+ * configuration parameter from the user and persist it in the
+ * {@link Configurator} and to save {@link Domain} instances that the user
+ * creates.
+ * 
+ * @author manuel.mauky
+ * 
+ */
 @Model
 public class AdminBackendController {
 
 	private Configurator configurator;
-
 	private DomainService domainService;
 
 
 	private int outgoingSmtpPort;
-
 	private String outgoingSmtpHost;
-
 	private String outgoingSmtpUsername;
-
 	private String outgoingSmtpPassword;
-
 	private List<Domain> domains;
-
 	private String newDomain;
-
 
 
 	@Inject

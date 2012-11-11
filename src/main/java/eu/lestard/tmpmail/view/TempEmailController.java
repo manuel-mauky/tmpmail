@@ -9,6 +9,13 @@ import eu.lestard.tmpmail.business.TempEmailAddressService;
 import eu.lestard.tmpmail.persistence.Domain;
 import eu.lestard.tmpmail.persistence.TempEmailAddress;
 
+/**
+ * This class is a controller that handles the user input for creating new
+ * {@link TempEmailAddress} instances.
+ * 
+ * @author manuel.mauky
+ * 
+ */
 @Model
 public class TempEmailController {
 
@@ -22,9 +29,6 @@ public class TempEmailController {
 	private TempEmailAddressService tempEmailAddressService;
 
 	private DomainController domainController;
-
-
-	private boolean error = false;
 
 
 	@Inject
@@ -75,14 +79,6 @@ public class TempEmailController {
 
 	public void setDomainId(String domainId) {
 		this.domainId = domainId;
-	}
-
-	public boolean isError() {
-		return error;
-	}
-
-	public void setError(boolean error) {
-		this.error = error;
 	}
 
 }

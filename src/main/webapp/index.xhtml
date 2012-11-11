@@ -54,11 +54,6 @@
 				<h:commandButton
 					value="Adresse Anlegen"
 					action="#{tempEmailController.addTempEmail}" />
-				<h:outputText rendered="#{tempEmailController.error}">
-					<h4>Fehler</h4>
-					<p>Leider ist etwas schief gegangen. Die Adresse konnte nicht hinzugefügt werden.
-					Möglicherweise wird sie schon verwendet.</p>
-				</h:outputText>
 				<h:messages />
 
 			</h:form>

@@ -9,6 +9,12 @@ import javax.inject.Named;
 import eu.lestard.tmpmail.persistence.User;
 
 
+/**
+ * This class holds the currently logged in user.
+ * 
+ * @author manuel.mauky
+ * 
+ */
 @SessionScoped
 @Named
 public class LoginContextBean implements Serializable {
@@ -16,6 +22,21 @@ public class LoginContextBean implements Serializable {
 
 	private User currentUser;
 
+	/**
+	 * This method can be used to ask whether the user is logged in or not.
+	 * 
+	 * With the @Named and @Produces annotation this value is available in the
+	 * EL-Context of JSF.
+	 * 
+	 * To access it you can simply write something like:
+	 * 
+	 * <code>
+	 *  rendered="#{loggedIn}"
+	 * </code>
+	 * 
+	 * 
+	 * @return
+	 */
 	@Named
 	@Produces
 	public boolean isLoggedIn() {
