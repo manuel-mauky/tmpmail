@@ -33,7 +33,6 @@ public class RegistrationController {
 
 
 	public String startRegistration() {
-		System.out.println("Start Registration with:" + emailAddress + "," + password);
 		boolean result = userService.registerNewUser(emailAddress, password);
 
 		if (result) {

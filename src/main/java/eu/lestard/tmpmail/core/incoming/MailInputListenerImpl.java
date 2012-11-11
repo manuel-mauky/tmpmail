@@ -55,7 +55,7 @@ public class MailInputListenerImpl implements MailInputListener {
 	 * @param ctx
 	 */
 	public void start(@Observes @Initialized ServletContext ctx) {
-		// this.start();
+		this.start();
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class MailInputListenerImpl implements MailInputListener {
 	 * @param ctx
 	 */
 	public void stop(@Observes @Destroyed ServletContext ctx) {
-		// this.stop();
+		this.stop();
 	}
 
 	@Override

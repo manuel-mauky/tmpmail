@@ -16,6 +16,10 @@ public class JpaTestHelper {
 		emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
 	}
 
+	public JpaTestHelper(EntityManagerFactory emf) {
+		this.emf = emf;
+	}
+
 	public EntityManagerFactory getEmf() {
 		return emf;
 	}

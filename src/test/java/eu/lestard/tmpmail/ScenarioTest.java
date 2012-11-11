@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.persistence.EntityManagerFactory;
 
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
@@ -72,7 +73,6 @@ public class ScenarioTest {
 
 	@Before
 	public void setup() {
-		jpaTestHelper = new JpaTestHelper();
 
 		wiser = new Wiser();
 		wiser.setPort(OUTGOING_SMTP_PORT);
@@ -81,6 +81,10 @@ public class ScenarioTest {
 
 
 		weld = new Weld().initialize();
+
+		EntityManagerFactory emf = weld.instance().select(EntityManagerFactory.class).get();
+
+		jpaTestHelper = new JpaTestHelper(emf);
 
 		configurator = weld.instance().select(Configurator.class).get();
 
@@ -91,6 +95,8 @@ public class ScenarioTest {
 
 
 		mailInputListener = weld.instance().select(MailInputListener.class).get();
+
+		jpaTestHelper.cleanDatabase();
 
 	}
 

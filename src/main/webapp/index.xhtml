@@ -8,11 +8,96 @@
 	template="/layout.xhtml">
 
 	<ui:define name="content">
+	
+		
+		<h:panelGroup rendered="#{not loggedIn}">
 
-		<p>Erstellen Sie Temporäre Email-Adressen, die auf ihre private Email-Adresse weiterleiten. Dadurch können Sie
-			Emails empfangen, ohne ihre private Email-Adresse öffentlich bekannt machen zu müssen.</p>
+			<p>Erstellen Sie Temporäre Email-Adressen, die auf ihre private Email-Adresse weiterleiten. Dadurch können Sie
+				Emails empfangen, ohne ihre private Email-Adresse öffentlich bekannt machen zu müssen.</p>
+
+			<p>Es ist ganz einfach:</p>
+
+			<ol>
+				<li>Registrieren Sie sich mit ihrer privaten Email-Adresse</li>
+				<li>Erstellen Sie eine temporäre Email-Adresse mit einer unserer Domains</li>
+				<li>Nutzen Sie ihre temporäre Email-Adresse zum Anmelden an Foren, Shops oder ähnlichen Seiten, denen Sie nicht
+					ihre private Email-Adresse anvertrauen möchten.</li>
+
+				<li>Jede Email, die an ihre temporäre Email-Adresse gesendet wird, wird automatisch von uns an Ihr privates
+					Post-Fach weitergeleitet.</li>
+			</ol>
+		</h:panelGroup>
 
 
+		<h:panelGroup rendered="#{loggedIn}">
+			<h3>Eine neue Temporäre Email-Adresse anlegen</h3>
+
+			<h:form id="newAddressForm">
+				<h:inputText
+					id="localPart"
+					value="#{tempEmailController.localPart}" />
+			
+				@
+				<h:selectOneMenu
+					id="domainPart"
+					value="#{tempEmailController.domainId}">
+					<f:selectItems
+						itemLabel="#{domain.domainAsString}"
+						var="domain"
+						itemValue="#{domain.id}"
+						
+						value="#{domainController.availableDomains}" />
+
+				</h:selectOneMenu>
+
+				<br />
+				<h:commandButton
+					value="Adresse Anlegen"
+					action="#{tempEmailController.addTempEmail}" />
+				<h:outputText rendered="#{tempEmailController.error}">
+					<h4>Fehler</h4>
+					<p>Leider ist etwas schief gegangen. Die Adresse konnte nicht hinzugefügt werden.
+					Möglicherweise wird sie schon verwendet.</p>
+				</h:outputText>
+				<h:messages />
+
+			</h:form>
+
+
+			<hr />
+
+			<h3>Ihre gespeicherten Temporären Email-Adressen</h3>
+
+			<h:panelGroup rendered="#{not empty loginContextBean.currentUser.tempEmailAddresses}">
+
+				<h:dataTable
+					cellspacing="0"
+					cellpadding="0"
+					styleClass="table"
+					headerClass="table-header"
+					value="#{loginContextBean.currentUser.tempEmailAddresses}"
+					var="emailAddress">
+
+					<h:column>
+						<f:facet name="header">Email-Adresse</f:facet>
+					#{emailAddress.localPart}@#{emailAddress.domainPart.domainAsString}
+				</h:column>
+
+					<h:column>
+						<f:facet name="header">Gültigkeit</f:facet>
+					1
+				</h:column>
+
+				</h:dataTable>
+			</h:panelGroup>
+			<h:panelGroup rendered="#{empty loginContextBean.currentUser.tempEmailAddresses}">
+				<p>Sie haben noch keine Temporären Email-Adressen angelegt.</p>
+			</h:panelGroup>
+
+			<hr />
+
+
+		</h:panelGroup>
 
 
 

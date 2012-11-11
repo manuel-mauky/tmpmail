@@ -43,7 +43,7 @@ public class MailFilterServiceIntegrationTest {
 	public void setup() {
 		jpaTestHelper = new JpaTestHelper();
 
-		EntityManagerFactory emf = Persistence.createEntityManagerFactory(JpaTestHelper.PERSISTENCE_UNIT);
+		EntityManagerFactory emf = jpaTestHelper.getEmf();
 
 		forwardingServiceMock = mock(ForwardingService.class);
 
